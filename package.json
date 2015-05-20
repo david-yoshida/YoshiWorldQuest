@@ -1,0 +1,10 @@
+{
+  "name": "YoshiWorld",
+  "version": "0.0.0",
+  "description": "YoshiWorld",
+  "main": "server.js",
+  "author": {
+    "name": "DAVID",
+    "email": ""
+  }
+}
