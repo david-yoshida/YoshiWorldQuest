@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <h1>Demo grid</h1>
+
+    <div class="row well">
+        Hello
+    </div>
+    <div class="row well">
+        <h3>Controls</h3>
+
+        <button id="button-left" class="btn btn-default" type="submit">Left</button> <button id="button-right" class="btn btn-default" type="submit">Right</button>
+    </div>
+
+
+    <script>
+        // Start the fun!
+        $(document).ready(function () {
+
+            $("#button-left").click(function () {
+
+                $.ajax({
+                    type: "POST",
+                    url: 'http://yoshiworld.goradii.com:1337',
+                    data: { q: "value" },
+                    async: true,
+                    dataType: 'text',   //you may use jsonp for cross origin request
+                    crossDomain: true,
+                    success: function (data, status) {
+                        //alert(data);
+                    }
+                });
+
+            });
+
+
+        });
+
+
+
+    </script>
+</body>
+</html>
