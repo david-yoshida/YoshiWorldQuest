@@ -266,14 +266,14 @@
 
             $.ajax({
                 type: "POST",
-                url: 'http://yoshiworld.goradii.com:1337',
-                data: { DIR: action },
+                url: 'http://yoshiworld.goradii.com:1337/',
+                data: { direction:action },
                 async: true,
                 dataType: 'text',   //you may use jsonp for cross origin request
                 crossDomain: true,
                 success: function (data, status) {
                     // alert(data);
-                    log(data);
+                    log("ser:" + data);
                    
 
                 }
@@ -304,7 +304,7 @@
 
 
             draw();
-            log(xPos + "-" + yPos);
+            log("cli:" + xPos + "-" + yPos);
         }
 
         function draw() {

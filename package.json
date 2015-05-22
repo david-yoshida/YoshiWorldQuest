@@ -1,10 +1,27 @@
 {
-  "name": "YoshiWorld",
+  "name": "yoshiworld",
   "version": "0.0.0",
   "description": "YoshiWorld",
   "main": "server.js",
-  "author": {
-    "name": "DAVID",
-    "email": ""
+  "author": "DAVID",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david-yoshida/YoshiWorld.git"
+  },
+  "keywords": [
+    "Adventure",
+    "Quest",
+    "fantasy"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/david-yoshida/YoshiWorld/issues"
+  },
+  "homepage": "https://github.com/david-yoshida/YoshiWorld#readme",
+  "dependencies": {
+    "express": "^4.12.4"
   }
 }

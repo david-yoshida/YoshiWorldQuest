@@ -1,9 +1,15 @@
 ﻿var http = require('http');
 var port = process.env.port || 1337;
+
+var serverCounter = 1;
+
 http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin':'*' });
+    
+    serverCounter++;
+    
 
-    res.end('Hello World\n' + Date.now());
+    res.end(serverCounter + '\n' + Date.now());
     
     // my comment
 }).listen(port);
