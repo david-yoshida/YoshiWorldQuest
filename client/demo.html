@@ -129,6 +129,9 @@
             <button id="button-right" class="btn btn-default" type="submit">Right</button> 
             <button id="button-up" class="btn btn-default" type="submit">Up</button> 
             <button id="button-down" class="btn btn-default" type="submit">Down</button> 
+
+            <button id="button-naomi" class="btn btn-default" type="submit">Naomi</button>
+            <button id="button-mia" class="btn btn-default" type="submit">Mia</button>
         </div>
 
 
@@ -140,7 +143,9 @@
     <script>
 
         // Init global vars;
-        var xPos, yPos, xMax, yMax;
+        var xPos, yPos, xMax, yMax, characterName;
+
+        characterName = "naomi";
 
         // Start the fun!
         $(document).ready(function () {
@@ -163,14 +168,39 @@
                 movement('down')
             });
 
+            $("#button-naomi").click(function () {
+                characterName = "naomi";
+                draw();
+            });
+
+            $("#button-mia").click(function () {
+                characterName = "mia";
+                draw();
+            });
+
+
+
+            /**
+            $("td").click(function () {
+                alert("The td was clicked.");
+            });
+            **/
+
+
+
             initGameBoard();  // add ids
             initController(); // bind arrow keys
             initStartPosition(); // 1-1
 
             //alert("#" + xPos + "-" + yPos);
 
-            draw();
+            draw();  // first draw
+            drawItems();
 
+
+            $("#8-8").click(function () {
+                alert("Treasure box");
+            });
 
         });
 
@@ -277,12 +307,20 @@
         }
 
         function draw() {
-            $("td").html("");
-            $("#" + xPos + "-" + yPos).html("aaa");
+            //$("td").html("");
+            //$("#" + xPos + "-" + yPos).html("aaa");
+
+            $("td").removeClass("mia")
+            $("td").removeClass("naomi")
+            $("#" + xPos + "-" + yPos).addClass(characterName)
+
         }
-        
 
+        function drawItems() {
 
+            $("#8-8").addClass("treasure")
+
+        }
 
         function log(logString) {
             $("#gameBoardLog").prepend(logString + '<br>');

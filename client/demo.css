@@ -22,16 +22,33 @@ h2 {
 }
 
 
-
 table {
 	margin: 0 auto;
 	border-collapse: collapse;
 	background: silver;
 }
 td {
-    width: 40px; height: 40px;
+    width: 40px; height: 40px;text-align:center;
 }
 
 tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
-	background: white;
+	background-color: white;
+}
+
+td.mia{ 
+    background: url(/images-character/mia.png); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+td.naomi{ 
+    background: url(/images-character/naomi.png); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+td.treasure{ 
+    background: url(/images-character/box_pink_treasure.png); 
+    background-repeat: no-repeat;
+    background-size: 100%;
 }
