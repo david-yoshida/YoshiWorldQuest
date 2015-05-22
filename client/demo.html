@@ -11,45 +11,282 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!--Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="demo.css">
+
 </head>
 
 <body>
-    <h1>Demo grid</h1>
+    <div class="container">
 
-    <div class="row well">
-        Hello
+        <h1>Demo grid - node.js | bootstrap | jquery |  AJAX  </h1>
+
+        <div class="row well">
+            Hello
+        </div>
+
+        <div class="row well">
+            <div class="col-md-9">
+                Game Board
+                <table id="gameBoard">
+                    <tr>
+                        <td id="1-1"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-3">
+                <div id="gameBoardLog" class="gameBoardLog">
+                    <strong>Game Log</strong>
+
+                    <ul>
+                        <li>Console interface - chat area?</li>
+                        <li>Console interface - charactor, inventory, health?</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <div class="row well">
+            <h2>Controls</h2>
+            <button id="button-left" class="btn btn-default" type="submit">Left</button> 
+            <button id="button-right" class="btn btn-default" type="submit">Right</button> 
+            <button id="button-up" class="btn btn-default" type="submit">Up</button> 
+            <button id="button-down" class="btn btn-default" type="submit">Down</button> 
+        </div>
+
+
+        <div class="row well">
+            Created by David Yoshida
+        </div>
+
     </div>
-    <div class="row well">
-        <h3>Controls</h3>
-
-        <button id="button-left" class="btn btn-default" type="submit">Left</button> <button id="button-right" class="btn btn-default" type="submit">Right</button>
-    </div>
-
-
     <script>
+
+        // Init global vars;
+        var xPos, yPos, xMax, yMax;
+
         // Start the fun!
         $(document).ready(function () {
 
+
+
             $("#button-left").click(function () {
-
-                $.ajax({
-                    type: "POST",
-                    url: 'http://yoshiworld.goradii.com:1337',
-                    data: { q: "value" },
-                    async: true,
-                    dataType: 'text',   //you may use jsonp for cross origin request
-                    crossDomain: true,
-                    success: function (data, status) {
-                        //alert(data);
-                    }
-                });
-
+                movement('left');
             });
+
+            $("#button-right").click(function () {
+                movement('right')
+            });
+
+            $("#button-up").click(function () {
+                movement('up')
+            });
+
+            $("#button-down").click(function () {
+                movement('down')
+            });
+
+            initGameBoard();  // add ids
+            initController(); // bind arrow keys
+            initStartPosition(); // 1-1
+
+            //alert("#" + xPos + "-" + yPos);
+
+            draw();
 
 
         });
 
 
+
+
+
+        /***
+            INITIALIZE THE GAME BOARD
+
+            1. Add Co-ordinate to all TDs
+        ***/
+        function initGameBoard() {
+
+            var rCount = 1;
+            var cCount = 1;
+
+            $("tr").each(function () {
+
+                $.each(this.cells, function () {
+                    $(this).attr("id", rCount + "-" + cCount);
+                    cCount += 1;
+                });
+
+                rCount += 1;
+                cCount = 1;
+            });
+
+            xMax = $("tr").size();      // set number of rows
+            yMax = $("tr:first").children('td').size(); // set number of columns
+
+        }
+
+        /***
+            INITIALIZE THE CONTROLLER
+        ***/
+        function initController() {
+
+            $(window).bind('keydown', function (e) {
+
+                if (e.keyCode == 37) {
+                    movement('left');
+                } else if (e.keyCode == 38) {
+                    movement('up');
+                } else if (e.keyCode == 39) {
+                    movement('right');
+                } else if (e.keyCode == 40) {
+                    movement('down');
+                }
+            });
+
+        }
+
+        function initStartPosition() {
+            xPos = 2;
+            yPos = 2;
+        }
+
+        //MOVE - SEND DATA TO SERVER
+        function movement(action) {
+            // alert(action);
+
+            $.ajax({
+                type: "POST",
+                url: 'http://yoshiworld.goradii.com:1337',
+                data: { DIR: action },
+                async: true,
+                dataType: 'text',   //you may use jsonp for cross origin request
+                crossDomain: true,
+                success: function (data, status) {
+                    // alert(data);
+                    log(data);
+                   
+
+                }
+            });
+
+
+
+            switch (action) {
+                case "up":
+                    xPos -= 1;
+                    if (xPos < 1) xPos = 1;
+                    break;
+                case "down":
+                    xPos += 1;
+                    if (xPos > xMax) xPos = xMax;
+                    break;
+                case "left":
+                    yPos -= 1;
+                    if (yPos < 1) yPos = 1;
+                    break;
+                case "right":
+                    yPos += 1;
+                    if (yPos > yMax) yPos = yMax;
+                    break;
+
+                default:
+            }
+
+
+            draw();
+            log(xPos + "-" + yPos);
+        }
+
+        function draw() {
+            $("td").html("");
+            $("#" + xPos + "-" + yPos).html("aaa");
+        }
+        
+
+
+
+        function log(logString) {
+            $("#gameBoardLog").prepend(logString + '<br>');
+        }
 
     </script>
 </body>
