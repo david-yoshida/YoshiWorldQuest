@@ -143,6 +143,8 @@
     </div>
     <script>
 
+
+
         // Init global vars;
         var xPos, yPos, xMax, yMax, characterName;
 
@@ -189,14 +191,15 @@
 
 
 
-            initGameBoard();  // add ids
+            initGameBoard();  // add div #ids to cell
             initController(); // bind arrow keys
-            initStartPosition(); // 1-1
+            initStartPosition(); // alert("#" + xPos + "-" + yPos);
 
-            //alert("#" + xPos + "-" + yPos);
+            
+            //movement('null');  // Call server to get position
 
-            draw();  // first draw
-            drawItems();
+            draw();         // first draw people
+            drawItems();    // second draw objects
 
 
             $("#8-8").click(function () {
@@ -260,27 +263,11 @@
             yPos = 2;
         }
 
-        //MOVE - SEND DATA TO SERVER
+
+        //MOVE - DRAW LOCAL AND SEND DATA TO SERVER
         function movement(action) {
-            // alert(action);
 
-            $.ajax({
-                type: "POST",
-                url: 'http://yoshiworld.goradii.com:1337/',
-                data: { direction:action },
-                async: true,
-                dataType: 'text',   //you may use jsonp for cross origin request
-                crossDomain: true,
-                success: function (data, status) {
-                    // alert(data);
-                    log("ser:" + data);
-                   
-
-                }
-            });
-
-
-
+            // Local Draw
             switch (action) {
                 case "up":
                     xPos -= 1;
@@ -302,27 +289,54 @@
                 default:
             }
 
+            //draw();  // draw local
 
-            draw();
+
+            // Server Draw
+            $.ajax({
+                type: "POST",
+                url: 'http://yoshiworld.goradii.com:1337/',
+                data: { direction: action },
+                timeout:100,
+                async: true,
+                dataType: 'text',   //you may use jsonp for cross origin request
+                crossDomain: true,
+                success: function (data, status) {
+                    // alert(data);
+                    var json = JSON.parse(data);
+                   
+                    log("ser:" + json.firstName + "," + json.xPos + "," + json.yPos);
+
+                    xPos = json.xPos;  // overwrite from server
+                    yPos = json.yPos;  // overwrite from server
+                    draw();  // draw base on server map
+                },
+                error: function () {
+                    draw();  // draw base on local movement
+                }
+            });
+
+
             log("cli:" + xPos + "-" + yPos);
         }
 
         function draw() {
-            //$("td").html("");
-            //$("#" + xPos + "-" + yPos).html("aaa");
 
             $("td").removeClass("mia")
             $("td").removeClass("naomi")
-            $("#" + xPos + "-" + yPos).addClass(characterName)
+            $("#" + xPos + "-" + yPos).addClass(characterName)            //$("#" + xPos + "-" + yPos).html("aaa");
 
         }
 
+
+        // Draw item routine
         function drawItems() {
 
             $("#8-8").addClass("treasure")
 
         }
 
+        // Send to gameboard Log
         function log(logString) {
             $("#gameBoardLog").prepend(logString + '<br>');
         }

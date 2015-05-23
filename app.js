@@ -1,3 +1,8 @@
+/*!
+ * YoshiQuest
+ * Copyright(c) 2015 David Yoshida
+ */
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -5,9 +10,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 
 
-
-
-// GAMEBOARD CLASS START
+/**
+ *      GAMEBOARD CLASS START
+ */
 var Gameboard = function (row, col) {
     this.maxRow = row - 1;
     this.maxCol = col - 1;
@@ -38,7 +43,9 @@ Gameboard.prototype.addPerson = function (person) {
 
 
 
-// PERSON CLASS START
+/**
+ *      PERSON CLASS START
+ */
 var Person = function (firstName) {
     this.firstName = firstName;
     this.xPos;
@@ -55,7 +62,7 @@ Person.prototype.movement = function (action) {
     switch (action) {
         case "up":
             xPos -= 1;
-            if (xPos < 1) xPos = 1;
+            if (xPos < 1) xPos = 0;
             break;
         case "down":
             xPos += 1;
@@ -63,7 +70,7 @@ Person.prototype.movement = function (action) {
             break;
         case "left":
             yPos -= 1;
-            if (yPos < 1) yPos = 1;
+            if (yPos < 1) yPos = 0;
             break;
         case "right":
             yPos += 1;
@@ -83,6 +90,19 @@ Person.prototype.movement = function (action) {
     console.log('Moved to: ' + this.xPos + '-' + this.yPos);
 
 }
+
+Person.prototype.parseLocationToJSON = function () {
+    
+    //var str = '{ "name": "John Doe", "age": 42 }';
+    //Adjust position to html gameboard co-ordinates
+    xPos = this.xPos + 1;
+    yPos = this.yPos + 1;
+
+
+    var str = '{ "firstName": "' + this.firstName + '", "xPos": ' + xPos +  ', "yPos": ' + yPos + ' }';
+
+    return str;
+}
 // PERSON CLASS END
 
 
@@ -93,7 +113,9 @@ var gameboard1 = new Gameboard(8,8);
 var person1 = new Person('Naomi');
 
 gameboard1.addPerson(person1);  // Add Naomi to the game board
-//person1.movement('right');
+
+
+
 
 
 
@@ -104,13 +126,16 @@ gameboard1.addPerson(person1);  // Add Naomi to the game board
 app.post('/', function (req, res) {
     
     var theDirection = req.body.direction;
+    var str;
     
     person1.movement(theDirection);
+    str = person1.parseLocationToJSON();
+
+    // Write to browser
+    res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+    res.end(str);
 
     
-    res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-
-  res.end(Date.now());
 });
 
 var server = app.listen(1337, function () {
