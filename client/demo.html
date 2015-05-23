@@ -19,7 +19,7 @@
 <body>
     <div class="container">
 
-        <h1>Demo grid - node.js | bootstrap | jquery |  AJAX  </h1>
+        <h1>Demo grid - node.js | bootstrap | jquery |  AJAX | css </h1>
 
         <div class="row well">
             Hello
@@ -30,7 +30,7 @@
                 <strong>Game Board</strong>
                 <table id="gameBoard">
                     <tr>
-                        <td id="1-1"></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -133,6 +133,7 @@
 
             <button id="button-naomi" class="btn btn-default" type="submit">Naomi</button>
             <button id="button-mia" class="btn btn-default" type="submit">Mia</button>
+            <button id="button-monster" class="btn btn-default" type="submit">Monster</button>
         </div>
 
 
@@ -152,7 +153,6 @@
 
         // Start the fun!
         $(document).ready(function () {
-
 
 
             $("#button-left").click(function () {
@@ -181,6 +181,10 @@
                 draw();
             });
 
+            $("#button-monster").click(function () {
+                characterName = "monster-bananna";
+                draw();
+            });
 
 
             /**
@@ -202,8 +206,8 @@
             drawItems();    // second draw objects
 
 
-            $("#8-8").click(function () {
-                alert("Treasure box");
+            $("#7-7").click(function () {
+                alert("Pink Treasure box");
             });
 
         });
@@ -219,8 +223,8 @@
         ***/
         function initGameBoard() {
 
-            var rCount = 1;
-            var cCount = 1;
+            var rCount = 0;
+            var cCount = 0;
 
             $("tr").each(function () {
 
@@ -230,7 +234,7 @@
                 });
 
                 rCount += 1;
-                cCount = 1;
+                cCount = 0;
             });
 
             xMax = $("tr").size();      // set number of rows
@@ -256,11 +260,12 @@
                 }
             });
 
+            // To Do: inventory hotkey?
+
         }
 
         function initStartPosition() {
-            xPos = 2;
-            yPos = 2;
+            movement('nothing');
         }
 
 
@@ -271,7 +276,7 @@
             switch (action) {
                 case "up":
                     xPos -= 1;
-                    if (xPos < 1) xPos = 1;
+                    if (xPos < 1) xPos = 0;
                     break;
                 case "down":
                     xPos += 1;
@@ -279,7 +284,7 @@
                     break;
                 case "left":
                     yPos -= 1;
-                    if (yPos < 1) yPos = 1;
+                    if (yPos < 1) yPos = 0;
                     break;
                 case "right":
                     yPos += 1;
@@ -324,6 +329,7 @@
 
             $("td").removeClass("mia")
             $("td").removeClass("naomi")
+            $("td").removeClass("monster-bananna")
             $("#" + xPos + "-" + yPos).addClass(characterName)            //$("#" + xPos + "-" + yPos).html("aaa");
 
         }
@@ -332,7 +338,8 @@
         // Draw item routine
         function drawItems() {
 
-            $("#8-8").addClass("treasure")
+            $("#3-3").addClass("treasure")
+            $("#7-7").addClass("treasure")
 
         }
 

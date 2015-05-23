@@ -57,3 +57,9 @@ td.treasure{
     background-repeat: no-repeat;
     background-size: 100%;
 }
+
+td.monster-bananna{ 
+    background: url(/images-character/monster-bananna.gif); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+}

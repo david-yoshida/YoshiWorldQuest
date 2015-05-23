@@ -80,12 +80,20 @@ Person.prototype.movement = function (action) {
         default:
     }
     
-    delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];  // remove person from old position
+    if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {
+        console.log("Blocked:Something here!");
+    } else {
 
-    this.xPos = xPos; // assign to new position
-    this.yPos = yPos; // assign to new position
+        delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];  // remove person from old position
+
+        this.xPos = xPos; // assign to new position
+        this.yPos = yPos; // assign to new position
     
-    this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
+        this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
+    }
+
+    
+
 
     console.log('Moved to: ' + this.xPos + '-' + this.yPos);
 
@@ -94,12 +102,7 @@ Person.prototype.movement = function (action) {
 Person.prototype.parseLocationToJSON = function () {
     
     //var str = '{ "name": "John Doe", "age": 42 }';
-    //Adjust position to html gameboard co-ordinates
-    xPos = this.xPos + 1;
-    yPos = this.yPos + 1;
-
-
-    var str = '{ "firstName": "' + this.firstName + '", "xPos": ' + xPos +  ', "yPos": ' + yPos + ' }';
+    var str = '{ "firstName": "' + this.firstName + '", "xPos": ' + this.xPos +  ', "yPos": ' + this.yPos + ' }';
 
     return str;
 }
@@ -111,8 +114,14 @@ Person.prototype.parseLocationToJSON = function () {
 
 var gameboard1 = new Gameboard(8,8);
 var person1 = new Person('Naomi');
+var Treasure1 = new Person('Treasure');
+
 
 gameboard1.addPerson(person1);  // Add Naomi to the game board
+
+
+gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
+gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
 
 
