@@ -7,7 +7,43 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(__dirname + '/public')); //and then the url localhost:8080/images/logo.gif should work
 
+var server = require('http').createServer(app)
+
+server.listen(3000);
+
+var io = require('socket.io').listen(server);
+
+
+
+
+/*
+
+var server = app.listen(3000, function () {
+    
+    var host = server.address().address;
+    var port = server.address().port;
+    
+    console.log('Example app listening at http://%s:%s', host, port);
+
+});
+ * */
+
+io.sockets.on('connection', function (socket) {
+    
+    console.log('socket.io - connection!');
+
+    socket.on('send message', function (data) {
+        
+        console.log('socket.io - send message!' + data);
+
+        io.sockets.emit('new message', data);
+
+
+        //io.broadcast.emit('new message', data); do not send to self.
+    });
+});
 
 
 /**
@@ -132,6 +168,8 @@ gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the
 
 
 // Don't forget get an post are different
+//
+// To Do change to /action
 app.post('/', function (req, res) {
     
     var theDirection = req.body.direction;
@@ -146,17 +184,6 @@ app.post('/', function (req, res) {
 
     
 });
-
-var server = app.listen(1337, function () {
-
-  var host = server.address().address;
-  var port = server.address().port;
-
-  console.log('Example app listening at http://%s:%s', host, port);
-
-});
-
-
 
 
 
