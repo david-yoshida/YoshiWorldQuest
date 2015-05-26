@@ -10,12 +10,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/public')); //and then the url localhost:8080/images/logo.gif should work
 
 var server = require('http').createServer(app)
+server.listen(3000, function () {
+    
+    var host = server.address().address;
+    var port = server.address().port;
+    
+    console.log('Example app listening at http://%s:%s', host, port);
 
-server.listen(3000);
+});
 
 var io = require('socket.io').listen(server);
-
-
 
 
 /*
@@ -66,12 +70,14 @@ var Gameboard = function (row, col) {
 Gameboard.prototype.addPerson = function (person) {
     person.xPos = 0;
     person.yPos = 0;
-    person.currentGameboard = this;  // bind them to this particular gameboard
+    person.currentGameboard = this;  // bind new person to this particular gameboard
 
     this.gameBoardArray[0][0] = person; // start position is 0,0
+    
+    //TODO:  Find open space for start location
 
     //if (this.gameBoardArray[0][0] != null) console.log("Something here 2!");
-    console.log("Welcome to the gameboard " + this.gameBoardArray[0][0].firstName);
+    console.log("Welcome to the gameboard " + this.gameBoardArray[0][0].firstName + '|' + this.gameBoardArray[0][0].id);
 };
 // GAMEBOARD CLASS END
 
@@ -82,11 +88,16 @@ Gameboard.prototype.addPerson = function (person) {
 /**
  *      PERSON CLASS START
  */
-var Person = function (firstName) {
+var Person = function (firstName, icon) {
+    this.id = this.getNextid();
+    this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
+    this.icon = icon;
     this.xPos;
     this.yPos;
     this.currentGameboard;
+    
+    console.log('Array length: ' + personArray.push(this));  // Add to the global personArray;
     console.log('Person instantiated');
 };
 
@@ -128,17 +139,47 @@ Person.prototype.movement = function (action) {
         this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
     }
 
+
+    console.log('Move: ' + this.firstName + ' (' + this.xPos + '-' + this.yPos + ')');
     
+    this.emitMovement(); // Send movement to all players
 
+}
 
-    console.log('Moved to: ' + this.xPos + '-' + this.yPos);
+Person.prototype.getNextid = function () {
+    var nextID = personID;
+    personID += 1;
+    
+    console.log('nextID: ' + nextID);
 
+    return nextID;
+}
+
+Person.prototype.generateSalt = function () {
+    
+    return 'salt';
+}
+
+Person.prototype.emitMovement = function () {
+    
+    var strEmit = '{ "id": ' + this.id + 
+                ',"firstName": "' + this.firstName + 
+                '","icon": "' + this.icon + 
+                '", "xPos": ' + this.xPos + 
+                ', "yPos": ' + this.yPos + 
+                ' }';
+    
+    io.sockets.emit('new movement', strEmit);
 }
 
 Person.prototype.parseLocationToJSON = function () {
     
-    //var str = '{ "name": "John Doe", "age": 42 }';
-    var str = '{ "firstName": "' + this.firstName + '", "xPos": ' + this.xPos +  ', "yPos": ' + this.yPos + ' }';
+    var str = '{ "id": ' + this.id + 
+                ',"firstName": "' + this.firstName + 
+                '","icon": "' + this.icon + 
+                '", "xPos": ' + this.xPos + 
+                ', "yPos": ' + this.yPos + 
+                ' }';  // i.e. var str = '{ "name": "John Doe", "age": 42 }';
 
     return str;
 }
@@ -148,10 +189,14 @@ Person.prototype.parseLocationToJSON = function () {
 
 
 
-var gameboard1 = new Gameboard(8,8);
+
+var personArray = new Array(0);
+var personID = 0;
+
+var gameboard1 = new Gameboard(8, 8);
+
 var person1 = new Person('Naomi');
 var Treasure1 = new Person('Treasure');
-
 
 gameboard1.addPerson(person1);  // Add Naomi to the game board
 
@@ -164,28 +209,48 @@ gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the
 
 
 
-
-
-
-// Don't forget get an post are different
-//
-// To Do change to /action
-app.post('/', function (req, res) {
+// To Do change to /action      !Don't forget get an post are different!
+app.post('/move', function (req, res) {
     
-    var theDirection = req.body.direction;
+    var theDirection    = req.body.direction;
+    var personID        = req.body.personID;
+    var icon            = req.body.icon;
     var str;
     
-    person1.movement(theDirection);
+    personArray[personID].movement(theDirection);
+    personArray[personID].icon = icon;                      // TO DO: allow change of clothes or appearance when equipment is used
+
+    str = personArray[personID].parseLocationToJSON();
+    
+    //console.log('firstName: ' + personArray[personID].firstName + ' ID: ' + personID + ' str: ' + str);
+
+    // Write to browser
+    res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+    res.end(str);
+
+});
+
+
+// NEW GAME CALLED
+app.post('/newGame', function (req, res) {
+    
+    var person1 = new Person(req.body.name); // get name from post
+    person1.icon = req.body.icon;
+    
+    gameboard1.addPerson(person1);  // Add new person to the game boards
+    person1.emitMovement();         // Emit to all users
+    
+    // TODO : add people to different game boards.
+    
+    var str;
+
     str = person1.parseLocationToJSON();
 
     // Write to browser
     res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
     res.end(str);
 
-    
 });
-
-
 
 
 
