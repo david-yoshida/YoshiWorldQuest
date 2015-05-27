@@ -68,18 +68,60 @@ var Gameboard = function (row, col) {
 }
 
 Gameboard.prototype.addPerson = function (person) {
+
     person.xPos = 0;
     person.yPos = 0;
     person.currentGameboard = this;  // bind new person to this particular gameboard
 
-    this.gameBoardArray[0][0] = person; // start position is 0,0
+    //this.gameBoardArray[0][0] = person; // start position is 0,0
     
-    //TODO:  Find open space for start location
+    // Random placement of new person
+    var xRnd, yRnd;
+
+    for (i = 0; i < ( this.gameBoardArray.length * this.gameBoardArray[0].length); i++) {
+        
+        xRnd = Math.floor((Math.random() * this.gameBoardArray.length));     // X
+        yRnd = Math.floor((Math.random() * this.gameBoardArray[0].length));  // Y
+        
+        // Check for free space
+        if (this.gameBoardArray[xRnd][yRnd] != null) {
+                // something here!
+        } else {
+
+            this.gameBoardArray[xRnd][yRnd] = person; // start position is 0,0
+            
+            person.xPos = xRnd;
+            person.yPos = yRnd;
+            
+            console.log("RND: " + xRnd + '|' + yRnd);
+
+            break;
+        }
+
+    }
+
+    
 
     //if (this.gameBoardArray[0][0] != null) console.log("Something here 2!");
-    console.log("Welcome to the gameboard " + this.gameBoardArray[0][0].firstName + '|' + this.gameBoardArray[0][0].id);
+    console.log("Welcome to the gameboard " + this.gameBoardArray[person.xPos][person.yPos].firstName + '|' + this.gameBoardArray[person.xPos][person.yPos].id + '|' + xRnd + '|' + yRnd);
 };
+
+
+Gameboard.prototype.broadcastRefresh = function (person) {
+    
+    // Call redraw for the whole gameboard
+    for (i = 0; i < personArray.length; i++) {
+        personArray[i].emitMovement();
+    }
+};
+
+
+
+
+
 // GAMEBOARD CLASS END
+
+
 
 
 
@@ -97,7 +139,7 @@ var Person = function (firstName, icon) {
     this.yPos;
     this.currentGameboard;
     
-    console.log('Array length: ' + personArray.push(this));  // Add to the global personArray;
+    console.log('personArray length: ' + personArray.push(this));  // Add to the global personArray;
     console.log('Person instantiated');
 };
 
@@ -147,8 +189,8 @@ Person.prototype.movement = function (action) {
 }
 
 Person.prototype.getNextid = function () {
-    var nextID = personID;
-    personID += 1;
+    var nextID = personIDcounter;
+    personIDcounter += 1;
     
     console.log('nextID: ' + nextID);
 
@@ -190,26 +232,16 @@ Person.prototype.parseLocationToJSON = function () {
 
 
 
-var personArray = new Array(0);
-var personID = 0;
-
-var gameboard1 = new Gameboard(8, 8);
-
-var person1 = new Person('Naomi');
-var Treasure1 = new Person('Treasure');
-
-gameboard1.addPerson(person1);  // Add Naomi to the game board
-
-
-gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
-gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
 
 
 
 
+/**
+ *  WEB SERVICE CALLS
+ */
 
-// To Do change to /action      !Don't forget get an post are different!
+// HANDLE PERSON MOVEMENT REQUEST
 app.post('/move', function (req, res) {
     
     var theDirection    = req.body.direction;
@@ -230,15 +262,16 @@ app.post('/move', function (req, res) {
 
 });
 
-
-// NEW GAME CALLED
+// NEW PLAYER REQUEST
 app.post('/newGame', function (req, res) {
     
-    var person1 = new Person(req.body.name); // get name from post
-    person1.icon = req.body.icon;
+    var person1 = new Person(req.body.name, req.body.icon); // get name from post
     
     gameboard1.addPerson(person1);  // Add new person to the game boards
-    person1.emitMovement();         // Emit to all users
+    //person1.emitMovement();         // Emit new person to all users
+    
+    gameboard1.broadcastRefresh(); // TO DO: EMIT TO ONLY THE NEW GAME PLAYER
+
     
     // TODO : add people to different game boards.
     
@@ -259,5 +292,27 @@ app.post('/newGame', function (req, res) {
 
 
 // USER DEFINED FUNCTIONS
+
+
+
+
+
+
+
+var personArray = new Array(0);
+var personIDcounter = 0;
+
+var gameboard1 = new Gameboard(8, 8);
+
+/*  Add default player
+ * 
+    var person1 = new Person('Naomi', 'naomi');
+    gameboard1.addPerson(person1);  // Add Naomi to the game board
+ */
+var Treasure1 = new Person('Treasure');
+
+gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
+gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
+
 
 
