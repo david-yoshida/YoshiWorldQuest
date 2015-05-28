@@ -35,9 +35,9 @@ table {
 td {
     /*
         width: 60px; height: 60px;text-align:center;border: 1px solid silver;
-
+        width: 50px; height: 50px;text-align:center;border: 1px solid silver; Average size;
     */
-        width: 50px; height: 50px;text-align:center;border: 1px solid silver;
+        width: 40px; height: 40px;text-align:center;border: 1px solid silver;
 }
 
 tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {

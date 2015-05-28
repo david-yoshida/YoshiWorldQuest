@@ -21,19 +21,6 @@ server.listen(3000, function () {
 
 var io = require('socket.io').listen(server);
 
-
-/*
-
-var server = app.listen(3000, function () {
-    
-    var host = server.address().address;
-    var port = server.address().port;
-    
-    console.log('Example app listening at http://%s:%s', host, port);
-
-});
- * */
-
 io.sockets.on('connection', function (socket) {
     
     console.log('socket.io - connection!');
@@ -43,8 +30,6 @@ io.sockets.on('connection', function (socket) {
         console.log('socket.io - send message!' + data);
 
         io.sockets.emit('new message', data);
-
-
         //io.broadcast.emit('new message', data); do not send to self.
     });
 });
@@ -61,8 +46,8 @@ var Gameboard = function (row, col) {
     this.gameBoardArray;
     
     this.gameBoardArray = new Array(row)
-    for (i = 0; i < row; i++)
-        this.gameBoardArray[i] = new Array(col);
+    for (i = 0; i < col; i++)
+        this.gameBoardArray[i] = new Array(row);
 
     console.log('Gameboard instantiated');
 }
@@ -72,16 +57,14 @@ Gameboard.prototype.addPerson = function (person) {
     person.xPos = 0;
     person.yPos = 0;
     person.currentGameboard = this;  // bind new person to this particular gameboard
-
-    //this.gameBoardArray[0][0] = person; // start position is 0,0
     
     // Random placement of new person
     var xRnd, yRnd;
 
     for (i = 0; i < ( this.gameBoardArray.length * this.gameBoardArray[0].length); i++) {
         
-        xRnd = Math.floor((Math.random() * this.gameBoardArray.length));     // X
-        yRnd = Math.floor((Math.random() * this.gameBoardArray[0].length));  // Y
+        xRnd = Math.floor((Math.random() * this.gameBoardArray[0].length));     // X
+        yRnd = Math.floor((Math.random() * this.gameBoardArray.length));  // Y
         
         // Check for free space
         if (this.gameBoardArray[xRnd][yRnd] != null) {
@@ -89,34 +72,24 @@ Gameboard.prototype.addPerson = function (person) {
         } else {
 
             this.gameBoardArray[xRnd][yRnd] = person; // start position is 0,0
-            
             person.xPos = xRnd;
             person.yPos = yRnd;
-            
-            console.log("RND: " + xRnd + '|' + yRnd);
-
             break;
         }
 
     }
 
-    
-
     //if (this.gameBoardArray[0][0] != null) console.log("Something here 2!");
     console.log("Welcome to the gameboard " + this.gameBoardArray[person.xPos][person.yPos].firstName + '|' + this.gameBoardArray[person.xPos][person.yPos].id + '|' + xRnd + '|' + yRnd);
 };
-
 
 Gameboard.prototype.broadcastRefresh = function (person) {
     
     // Call redraw for the whole gameboard
     for (i = 0; i < personArray.length; i++) {
-        personArray[i].emitMovement();
+        if (personArray[i] != null) personArray[i].emitMovement(); // skip blank
     }
 };
-
-
-
 
 
 // GAMEBOARD CLASS END
@@ -171,6 +144,27 @@ Person.prototype.movement = function (action) {
     
     if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {
         console.log("Blocked:Something here!");
+        
+        
+        // Kill the bannana, as long as you are not the bananna
+        if (this.icon != "monster-bananna" && this.currentGameboard.gameBoardArray[xPos][yPos].icon == "monster-bananna") {
+            
+            console.log(this.firstName + " ate the Bannana!");
+            
+            var monster1 = this.currentGameboard.gameBoardArray[xPos][yPos]; // grab the monster
+            
+            var strEmit = '{ "id": ' + monster1.id + 
+                ',"firstName": "' + monster1.firstName + 
+                '","icon": "' + monster1.icon + 
+                '", "xPos": ' + monster1.xPos + 
+                ', "yPos": ' + monster1.yPos + 
+                ' }';
+            
+            io.sockets.emit('remove person', strEmit);                  // broadcast remove person
+            delete personArray[monster1.id];                            // delete from person array, but keep stucture. TO DO:  issue person array keeps growing, never get's smaller
+            delete this.currentGameboard.gameBoardArray[xPos][yPos];    // delete from game board
+        }
+
     } else {
 
         delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];  // remove person from old position
@@ -287,22 +281,33 @@ app.post('/newGame', function (req, res) {
 
 
 
+/**
+ *  HANDY FUNCTIONS
+ */
+// Check if NPC exists
+function findInArray(myArray, id) {
+    
+    var personExists = -1;
+    
+    for (i = 0; i < myArray.length; i++) {
+        if (myArray[i].id == id) personExists = i; // found id!
+    }
+    
+    return personExists;
+}
 
 
 
 
-// USER DEFINED FUNCTIONS
 
-
-
-
-
-
+/**
+ *  MAIN SETUP HERE
+ */
 
 var personArray = new Array(0);
 var personIDcounter = 0;
 
-var gameboard1 = new Gameboard(8, 8);
+var gameboard1 = new Gameboard(8, 12); // row, col
 
 /*  Add default player
  * 

@@ -39,12 +39,6 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -55,12 +49,6 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -79,12 +67,6 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -99,8 +81,58 @@
                         <td></td>
                         <td></td>
                         <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                     </tr>
                     <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -147,15 +179,19 @@
 
     </div>
     <script>
+
+       
+        // Init global vars;
+        var xPos, yPos, xMax, yMax, icon, personID, tickCounter, movementRate;
         var npcArray;
 
         npcArray = new Array(0);
-       
-        // Init global vars;
-        var xPos, yPos, xMax, yMax, icon, personID;
 
         icon = "naomi";
         personID = -1;
+        movementRate = 200;
+        tickCounter = 0;
+
 
         // Start the fun!
         $(document).ready(function () {
@@ -170,28 +206,35 @@
                 
             // Listen for server messages.
             socket.on('new movement', function (data) {
-
-                log('<i> incoming socket' + data + '</i>');
-
                 var json = JSON.parse(data);
                 var index = findInArray(npcArray, json.id);
 
                 if (index >= 0) {  // found!, so update co-ordinates
                     npcArray[index] = json;
-                    //log('<strong>NPC updated: ' + json.id + ' ' + index + '</strong>');
                 } else {
                     npcArray.push(json);
-                    //log('<strong>push! NPC added: ' + json.id + '</strong>');
                 }
-
-
-                log('<strong>npcArray.length: ' + npcArray.length + '</strong>');
-
 
                 draw();  // Call the draw
 
-
             })
+
+            socket.on('remove person', function (data) {
+                var json = JSON.parse(data);
+                log('<strong>' + data + '</strong>');
+
+                var index = findInArray(npcArray, json.id);
+                npcArray.splice(index, 1);
+                draw();  // Call the draw
+
+                if (personID == json.id) {
+                    alert('game over!');
+                    personID = -1;
+
+                }
+            })
+
+
 
 
 
@@ -213,17 +256,21 @@
                 movement('down')
             });
 
+            // NPC Test
             $("#button-naomi").click(function () {
                 icon = "naomi";
+                movementRate = 200;
                 draw();
             });
 
             $("#button-mia").click(function () {
                 icon = "mia";
+                movementRate = 100;
                 draw();
             });
 
             $("#button-monster").click(function () {
+                movementRate = 0;
                 icon = "monster-bananna";
                 draw();
             });
@@ -340,58 +387,63 @@
         //MOVE - DRAW LOCAL AND SEND DATA TO SERVER
         function movement(action) {
 
-            // Local Draw
-            switch (action) {
-                case "up":
-                    xPos -= 1;
-                    if (xPos < 1) xPos = 0;
-                    break;
-                case "down":
-                    xPos += 1;
-                    if (xPos > xMax) xPos = xMax;
-                    break;
-                case "left":
-                    yPos -= 1;
-                    if (yPos < 1) yPos = 0;
-                    break;
-                case "right":
-                    yPos += 1;
-                    if (yPos > yMax) yPos = yMax;
-                    break;
+            if (Date.now() - tickCounter > movementRate) { // movement rate check
 
-                default:
-            }
+                // Local Draw
+                switch (action) {
+                    case "up":
+                        xPos -= 1;
+                        if (xPos < 1) xPos = 0;
+                        break;
+                    case "down":
+                        xPos += 1;
+                        if (xPos > xMax) xPos = xMax;
+                        break;
+                    case "left":
+                        yPos -= 1;
+                        if (yPos < 1) yPos = 0;
+                        break;
+                    case "right":
+                        yPos += 1;
+                        if (yPos > yMax) yPos = yMax;
+                        break;
 
-            // Server Draw, once personID has been obtained
-            if (personID > 0) {
+                    default:
+                }
 
-                $.ajax({
-                    type: "POST",
-                    url: '/move',
-                    data: { direction: action, personID: personID, icon: icon },
-                    timeout:100,
-                    async: true,
-                    dataType: 'text',   //you may use jsonp for cross origin request
-                    crossDomain: true,
-                    success: function (data, status) {
-                        //alert(data);
-                        var json = JSON.parse(data);
-                   
-                        log("server: id:" + json.id + " name:" + json.firstName + " x:" + json.xPos + " y:" + json.yPos);
+                // Server Draw, once personID has been obtained
+                if (personID > 0) {
 
-                        xPos = json.xPos;  // overwrite from server
-                        yPos = json.yPos;  // overwrite from server
-                        draw();  // draw base on server map
-                    },
-                    error: function () {
-                        draw();  // draw base on local movement
-                    }
-                });
+                    $.ajax({
+                        type: "POST",
+                        url: '/move',
+                        data: { direction: action, personID: personID, icon: icon },
+                        timeout: 100,
+                        async: true,
+                        dataType: 'text',   //you may use jsonp for cross origin request
+                        crossDomain: true,
+                        success: function (data, status) {
+                            //alert(data);
+                            var json = JSON.parse(data);
+
+                            log("server: id:" + json.id + " name:" + json.firstName + " x:" + json.xPos + " y:" + json.yPos);
+
+                            xPos = json.xPos;  // overwrite from server
+                            yPos = json.yPos;  // overwrite from server
+                            draw();  // draw base on server map
+                        },
+                        error: function () {
+                            draw();  // draw base on local movement
+                        }
+                    });
 
 
-            log("client:" + xPos + "-" + yPos);
+                    log("client:" + xPos + "-" + yPos);
 
-            }
+                }
+
+                tickCounter = Date.now();
+            }  // end if movementRate
         }
 
         function draw() {
