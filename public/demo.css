@@ -40,38 +40,75 @@ td {
         width: 40px; height: 40px;text-align:center;border: 1px solid silver;
 }
 
+/* ADD FOR CHESS BOARD
 tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
-	background-color: white;
+        background-color: white;
+}
+*/
+
+.mia{ 
+    background: url(/images-character/mia.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 39px; height: 39px;
 }
 
-td.mia{ 
-    background: url(/images-character/mia.png); 
+
+.naomi{ 
+    background-image: url(/images-character/naomi.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 39px; height: 39px;
+}
+
+.monster-bananna{ 
+    background-image: url(/images-character/monster-bananna.gif); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 39px; height: 39px;
+}
+
+.treasure{ 
+    background-image: url(/images-character/box_pink_treasure.png); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 39px; height: 39px;
+}
+
+.tile-tree1{ 
+    /* Tree added as an object */
+    background-image: url(/images-tile/tree1.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 39px; height: 39px;
+}
+
+
+/*
+    Background Scenary moveable
+*/
+td.tile-grass1{ 
+    background-image: url(/images-tile/grass1.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    position: relative;
+}
+
+
+/*
+    Background Scenary non-moveable
+*/
+td.tile-tree1{ 
+    /* background-image: url(/images-character/mia.png), url(/images-tile/tree1.png); */
+ 
+    background-image: url(/images-tile/tree1.png);
     background-repeat: no-repeat;
     background-size: 100%;
 }
 
-td.naomi{ 
-    background: url(/images-character/naomi.png);
+td.tile-tree2{ 
+    background-image: url(/images-tile/tree2.png); 
     background-repeat: no-repeat;
     background-size: 100%;
 }
 
-td.treasure{ 
-    background: url(/images-character/box_pink_treasure.png); 
-    background-repeat: no-repeat;
-    background-size: 100%;
-}
-
-td.monster-bananna{ 
-    background: url(/images-character/monster-bananna.gif); 
-    background-repeat: no-repeat;
-    background-size: 100%;
-}
-
-
-div.mia{ 
-    background: url(/images-character/mia.png); 
-    background-repeat: no-repeat;
-    background-size: 100%;
-    width: 50px; height: 50px;
-}

@@ -63,8 +63,8 @@ Gameboard.prototype.addPerson = function (person) {
 
     for (i = 0; i < ( this.gameBoardArray.length * this.gameBoardArray[0].length); i++) {
         
-        xRnd = Math.floor((Math.random() * this.gameBoardArray[0].length));     // X
-        yRnd = Math.floor((Math.random() * this.gameBoardArray.length));  // Y
+        xRnd = Math.floor((Math.random() * this.gameBoardArray[0].length) + 1) - 1;     // X
+        yRnd = Math.floor((Math.random() * this.gameBoardArray.length) + 1) - 1;  // Y  // TODO: BUG goes to 8!!!!
         
         // Check for free space
         if (this.gameBoardArray[xRnd][yRnd] != null) {
@@ -199,8 +199,8 @@ Person.prototype.generateSalt = function () {
 Person.prototype.emitMovement = function () {
     
     var strEmit = '{ "id": ' + this.id + 
-                ',"firstName": "' + this.firstName + 
-                '","icon": "' + this.icon + 
+                ', "firstName": "' + this.firstName + 
+                '", "icon": "' + this.icon + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
                 ' }';
@@ -211,8 +211,8 @@ Person.prototype.emitMovement = function () {
 Person.prototype.parseLocationToJSON = function () {
     
     var str = '{ "id": ' + this.id + 
-                ',"firstName": "' + this.firstName + 
-                '","icon": "' + this.icon + 
+                ', "firstName": "' + this.firstName + 
+                '", "icon": "' + this.icon + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
                 ' }';  // i.e. var str = '{ "name": "John Doe", "age": 42 }';
@@ -314,10 +314,16 @@ var gameboard1 = new Gameboard(8, 12); // row, col
     var person1 = new Person('Naomi', 'naomi');
     gameboard1.addPerson(person1);  // Add Naomi to the game board
  */
-var Treasure1 = new Person('Treasure');
+var Treasure1 = new Person('Treasure', 'treasure');
+gameboard1.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
 
 gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
 gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
+var tree1;
+// Add random trees
+for (s = 0; s < 10; s++) {
+    tree1 = new Person('Tree', 'tile-tree1');
+    gameboard1.addPerson(tree1);  // add random tree;
 
-
+}
