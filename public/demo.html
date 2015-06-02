@@ -43,7 +43,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
-                    </tr> 
+                    </tr>
                     <tr>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -167,8 +167,14 @@
 
             <button id="button-naomi" class="btn btn-default" type="submit">Naomi</button>
             <button id="button-mia" class="btn btn-default" type="submit">Mia</button>
-            <button id="button-monster" class="btn btn-default" type="submit">Monster</button>
+            <button id="button-monster-banana" class="btn btn-default" type="submit">Monster Banana</button>
+            <button id="button-monster-baby" class="btn btn-default" type="submit">Monster Baby</button>
+            <!--<button id="button-monster-dino" class="btn btn-default" type="submit">Monster Dragon</button>-->
             &nbsp;
+
+            <button id="button-random" class="btn btn-default" type="submit">random</button>
+            
+
             <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
         </div>
 
@@ -179,8 +185,9 @@
 
     </div>
     <script>
+        var xGBStartPosition = 0;    // x start position
+        var yGBStartPosition = 0;   // y start position
 
-       
         // Init global vars;
         var xPos, yPos, xMax, yMax, icon, personID, tickCounter, movementRate;
         var npcArray;
@@ -198,7 +205,6 @@
 
             var socket = io.connect();
 
-
             // Listen for server messages.
             socket.on('new message', function (data) {
                 log('<strong>' + data + '</strong>');
@@ -210,17 +216,17 @@
                 var json = JSON.parse(data);
                 var index = findInArray(npcArray, json.id);
 
-                if (index >= 0) {  // found!, so update co-ordinates
+                if (index >= 0) // found!, so update co-ordinates
                     npcArray[index] = json;
-                } else {
+                else
                     npcArray.push(json);
-                }
 
                 draw();  // Call the draw
 
             })
 
             socket.on('remove person', function (data) {
+
                 var json = JSON.parse(data);
                 log('<strong>' + data + '</strong>');
 
@@ -240,7 +246,7 @@
 
 
             $("#button-left").click(function () {
-                socket.emit('send message', 'Hello again Socket!');
+                //socket.emit('send message', 'Hello again Socket!');
                 movement('left');
                 
             });
@@ -270,11 +276,30 @@
                 draw();
             });
 
-            $("#button-monster").click(function () {
+            $("#button-monster-banana").click(function () {
                 movementRate = 0;
-                icon = "monster-bananna";
+                icon = "monster-banana";
+                draw();
+               });
+
+
+            $("#button-monster-baby").click(function () {
+                movementRate = 0;
+                icon = "monster-baby";
                 draw();
             });
+
+
+            $("#button-monster-dino").click(function () {
+                movementRate = 0;
+                icon = "monster-dino";
+                draw();
+            });
+
+            $("#button-random").click(function () {
+                alert(Math.floor((Math.random() * 10) + 1));
+            });
+            
 
 
             $("#button-new-game").click(function () {
@@ -305,11 +330,15 @@
 
             });
 
-            /**
+            
+
+            /*
+            TODO: Launch Modal on monsters.  Using AJAX .load
             $("td").click(function () {
-                alert("The td was clicked.");
+                //alert("The td was clicked.");
+                alert(this.id);
             });
-            **/
+            */
 
 
 
@@ -336,26 +365,31 @@
             INITIALIZE THE GAME BOARD
 
             1. Add Co-ordinate to all TDs
+            2. use xGBStartPosition and yGBStartPosition to start the game board co-ordinates
+
         ***/
         function initGameBoard() {
 
-            var rCount = 0;
-            var cCount = 0;
+            var xCount, yCount;
+
+            xCount = xGBStartPosition;
+            yCount = yGBStartPosition;
+
 
             $("tr").each(function () {
 
                 $.each(this.cells, function () {
-                    $(this).attr("id", rCount + "-" + cCount);
-                    $(this).addClass("tile-grass1");  // remove for chess board
+                    $(this).attr("id", xCount + "-" + yCount); // TD
+                    $(this).addClass("tile-grass1"); 
 
-                    $(this).children('div').attr("id", "P-" + rCount + "-" + cCount);
-                    //$(this).children('div').attr("class", "personHolder mia");
+                    $(this).children('div').attr("id", "P-" + xCount + "-" + yCount); // child DIV
+                    $(this).children('div').attr("class", "personHolder");
                     
-                    cCount += 1;
+                    yCount++;
                 });
 
-                rCount += 1;
-                cCount = 0;
+                xCount ++;
+                yCount = yGBStartPosition;
             });
 
             xMax = $("tr").size();      // set number of rows
@@ -371,12 +405,19 @@
             $(window).bind('keydown', function (e) {
 
                 if (e.keyCode == 37) {
+                    e.preventDefault();
                     movement('left');
+
                 } else if (e.keyCode == 38) {
+                   e.preventDefault();
                     movement('up');
+
                 } else if (e.keyCode == 39) {
+                   e.preventDefault();
                     movement('right');
+
                 } else if (e.keyCode == 40) {
+                    e.preventDefault();
                     movement('down');
                 }
             });
@@ -430,12 +471,39 @@
                         crossDomain: true,
                         success: function (data, status) {
                             //alert(data);
+                            log("json move:" + data);
+
+
                             var json = JSON.parse(data);
 
-                            log("server: id:" + json.id + " name:" + json.firstName + " x:" + json.xPos + " y:" + json.yPos);
+                            //log("server: id:" + json.id + " name:" + json.firstName + " x:" + json.xPos + " y:" + json.yPos);
 
                             xPos = json.xPos;  // overwrite from server
                             yPos = json.yPos;  // overwrite from server
+
+
+                            // TO DO:  Check if user has moved to a different game board section, then initController(initGameBoard()
+                            // Jump to new gameboard
+                            if (json.ySectionStart != yGBStartPosition || json.xSectionStart != xGBStartPosition) {
+                                xGBStartPosition = json.xSectionStart;
+                                yGBStartPosition = json.ySectionStart;
+                                initGameBoard();  // add div #ids
+                                drawItems();      // draw items
+                            }
+
+                            /*
+                            if (yPos < 12 && yGBStartPosition != 0) { // EXIT STAGE LEFT ONLY!!!!!!!!!!!!!!!!!!
+                                yGBStartPosition = 0;
+                                initGameBoard();  // add div #ids
+                                drawItems();      // draw items
+
+                            }
+                            if (yPos >= 12 && yGBStartPosition != 12) { // EXIT STAGE RIGHT ONLY!!!!!!!!!!!!!!!!!!
+                                yGBStartPosition = 12;
+                                initGameBoard();  // add div #ids
+                                drawItems();      // draw items
+                            }*/
+
                             draw();  // draw base on server map
                         },
                         error: function () {
@@ -456,25 +524,29 @@
 
             $("div").removeClass("mia");
             $("div").removeClass("naomi");
-            $("div").removeClass("monster-bananna");
+            $("div").removeClass("monster-banana");
+            $("div").removeClass("monster-baby");
+            $("div").removeClass("monster-dino");
+            $("div").removeClass("title");
             //$("#" + xPos + "-" + yPos).addClass(icon);            //$("#" + xPos + "-" + yPos).html("aaa");
 
-
-            // Draw the other players
+            // Draw the other players, including self
             for (i = 0; i < npcArray.length; i++)
             {
                 $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);
+                $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("title", npcArray[i].firstName);
             }
-                
+
         }
 
 
         // Draw item routine
         function drawItems() {
-            
-            $("#3-3").addClass("tile-tree1"); // 
+            $("td").removeClass("tile-tree1");
+            $("#3-3").addClass("tile-tree1");
+            $("td").removeClass("tile-tree2");
             $("#7-7").addClass("tile-tree2");
-            //$("#P-5-5").addClass("treasure") // test layer, perhaps terrain is background css, and image is foreground
+
         }
 
         // Send to gameboard Log
@@ -496,6 +568,9 @@
             return personExists;
         }
 
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     </script>
 </body>
 </html>

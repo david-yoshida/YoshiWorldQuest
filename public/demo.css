@@ -36,8 +36,10 @@ td {
     /*
         width: 60px; height: 60px;text-align:center;border: 1px solid silver;
         width: 50px; height: 50px;text-align:center;border: 1px solid silver; Average size;
-    */
         width: 40px; height: 40px;text-align:center;border: 1px solid silver;
+}
+    */
+        width: 50px; height: 50px;text-align:center;border: 1px solid silver;
 }
 
 /* ADD FOR CHESS BOARD
@@ -46,11 +48,14 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
 }
 */
 
+.personHolder {
+    width: 48px; height: 48px;
+}
+
 .mia{ 
     background: url(/images-character/mia.png);
     background-repeat: no-repeat;
     background-size: 100%;
-    width: 39px; height: 39px;
 }
 
 
@@ -58,21 +63,31 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-image: url(/images-character/naomi.png);
     background-repeat: no-repeat;
     background-size: 100%;
-    width: 39px; height: 39px;
 }
 
-.monster-bananna{ 
-    background-image: url(/images-character/monster-bananna.gif); 
+.monster-banana{ 
+    background-image: url(/images-character/monster-banana.gif); 
     background-repeat: no-repeat;
     background-size: 100%;
-    width: 39px; height: 39px;
 }
+
+.monster-baby{ 
+    background-image: url(/images-character/monster-baby.gif); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.monster-dino{ 
+    background-image: url(/images-character/monster-dino.gif); 
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
 
 .treasure{ 
     background-image: url(/images-character/box_pink_treasure.png); 
     background-repeat: no-repeat;
     background-size: 100%;
-    width: 39px; height: 39px;
 }
 
 .tile-tree1{ 
@@ -80,8 +95,16 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-image: url(/images-tile/tree1.png);
     background-repeat: no-repeat;
     background-size: 100%;
-    width: 39px; height: 39px;
 }
+
+.tile-tree2{ 
+    /* Tree added as an object */
+    background-image: url(/images-tile/tree2.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+
 
 
 /*
@@ -91,24 +114,17 @@ td.tile-grass1{
     background-image: url(/images-tile/grass1.png);
     background-repeat: no-repeat;
     background-size: 100%;
-    position: relative;
 }
 
-
-/*
-    Background Scenary non-moveable
-*/
 td.tile-tree1{ 
-    /* background-image: url(/images-character/mia.png), url(/images-tile/tree1.png); */
- 
     background-image: url(/images-tile/tree1.png);
     background-repeat: no-repeat;
     background-size: 100%;
 }
 
 td.tile-tree2{ 
-    background-image: url(/images-tile/tree2.png); 
+    background-image: url(/images-tile/tree1.png);
     background-repeat: no-repeat;
     background-size: 100%;
-}
+}    
 

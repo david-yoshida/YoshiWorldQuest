@@ -54,33 +54,39 @@ var Gameboard = function (row, col) {
 
 Gameboard.prototype.addPerson = function (person) {
 
+    var success = false;
     person.xPos = 0;
     person.yPos = 0;
     person.currentGameboard = this;  // bind new person to this particular gameboard
-    
+
     // Random placement of new person
     var xRnd, yRnd;
 
-    for (i = 0; i < ( this.gameBoardArray.length * this.gameBoardArray[0].length); i++) {
-        
-        xRnd = Math.floor((Math.random() * this.gameBoardArray[0].length) + 1) - 1;     // X
-        yRnd = Math.floor((Math.random() * this.gameBoardArray.length) + 1) - 1;  // Y  // TODO: BUG goes to 8!!!!
-        
+    for (i = 0; i < (this.maxRow * this.maxCol) ; i++) {
+
+        xRnd = Math.floor(Math.random() * (this.maxRow + 1)) + 0;    // i.e. 1-8
+        yRnd = Math.floor(Math.random() * (this.maxCol + 1)) + 0;      // i.e. 1- 10
+
         // Check for free space
         if (this.gameBoardArray[xRnd][yRnd] != null) {
                 // something here!
         } else {
 
-            this.gameBoardArray[xRnd][yRnd] = person; // start position is 0,0
+            this.gameBoardArray[xRnd][yRnd] = person; // update start position on game board
             person.xPos = xRnd;
             person.yPos = yRnd;
+            person.refreshSection();// Refresh the section co-ordinates they are in.
+            success = true;
+
+            console.log("Welcome to the gameboard " + this.gameBoardArray[person.xPos][person.yPos].firstName + '| ID:' + this.gameBoardArray[person.xPos][person.yPos].id + '| (' + person.xPos + ',' + person.yPos + ')' + '  Grid:(' + person.xSectionStart + ',' + person.ySectionStart + ')' );
             break;
         }
+    } // end for
 
+    if (!success) {
+        console.log("ERROR: " + person.firstName + " not added to gameboard");
     }
 
-    //if (this.gameBoardArray[0][0] != null) console.log("Something here 2!");
-    console.log("Welcome to the gameboard " + this.gameBoardArray[person.xPos][person.yPos].firstName + '|' + this.gameBoardArray[person.xPos][person.yPos].id + '|' + xRnd + '|' + yRnd);
 };
 
 Gameboard.prototype.broadcastRefresh = function (person) {
@@ -104,20 +110,23 @@ Gameboard.prototype.broadcastRefresh = function (person) {
  *      PERSON CLASS START
  */
 var Person = function (firstName, icon) {
+
     this.id = this.getNextid();
     this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
     this.icon = icon;
     this.xPos;
     this.yPos;
+    this.xSectionStart;
+    this.ySectionStart; 
+    this.createdDate = Date.now();
     this.currentGameboard;
     
-    console.log('personArray length: ' + personArray.push(this));  // Add to the global personArray;
-    console.log('Person instantiated');
+    console.log('Person instantiated. ' + personArray.push(this) + ' people.');  // Add to the global personArray;
 };
 
 Person.prototype.movement = function (action) {
-    
+
     var xPos = this.xPos; // assign global to local variable
     var yPos = this.yPos; // assign global to local variable
 
@@ -142,12 +151,14 @@ Person.prototype.movement = function (action) {
         default:
     }
     
+
+    
     if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {
         console.log("Blocked:Something here!");
         
         
         // Kill the bannana, as long as you are not the bananna
-        if (this.icon != "monster-bananna" && this.currentGameboard.gameBoardArray[xPos][yPos].icon == "monster-bananna") {
+        if (this.icon != "monster-banana" && this.currentGameboard.gameBoardArray[xPos][yPos].icon == "monster-banana") {
             
             console.log(this.firstName + " ate the Bannana!");
             
@@ -171,6 +182,8 @@ Person.prototype.movement = function (action) {
 
         this.xPos = xPos; // assign to new position
         this.yPos = yPos; // assign to new position
+
+        this.refreshSection();// Refresh the section co-ordinates person is in now
     
         this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
     }
@@ -182,11 +195,29 @@ Person.prototype.movement = function (action) {
 
 }
 
-Person.prototype.getNextid = function () {
-    var nextID = personIDcounter;
-    personIDcounter += 1;
+
+// Refresh the gameboard section person is on
+Person.prototype.refreshSection = function () {
     
-    console.log('nextID: ' + nextID);
+    if(true){
+        this.xSectionStart = Math.floor(this.xPos / GLOBAL_SECTION_SIZE_X) * GLOBAL_SECTION_SIZE_X;
+        this.ySectionStart = Math.floor(this.yPos / GLOBAL_SECTION_SIZE_Y) * GLOBAL_SECTION_SIZE_Y;
+    } else {
+    
+    //TODO:  Try to put section start points 1 at a time instead of 8.  You will get a scrolling effect
+        this.xSectionStart = Math.floor(this.xPos / GLOBAL_SECTION_SIZE_X);
+        this.ySectionStart = Math.floor(this.yPos / GLOBAL_SECTION_SIZE_Y);
+    }
+
+
+}
+
+// Get Next Person ID
+Person.prototype.getNextid = function () {
+
+    var nextID = personIDcounter;
+
+    personIDcounter++;
 
     return nextID;
 }
@@ -215,6 +246,8 @@ Person.prototype.parseLocationToJSON = function () {
                 '", "icon": "' + this.icon + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
+                ', "xSectionStart": ' + this.xSectionStart + 
+                ', "ySectionStart": ' + this.ySectionStart + 
                 ' }';  // i.e. var str = '{ "name": "John Doe", "age": 42 }';
 
     return str;
@@ -307,7 +340,10 @@ function findInArray(myArray, id) {
 var personArray = new Array(0);
 var personIDcounter = 0;
 
-var gameboard1 = new Gameboard(8, 12); // row, col
+var GLOBAL_SECTION_SIZE_X = 8;
+var GLOBAL_SECTION_SIZE_Y = 12;
+
+var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
 
 /*  Add default player
  * 
@@ -320,10 +356,14 @@ gameboard1.addPerson(Treasure1);  // Person and object are treated the same, so 
 gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
 gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
+
+
 var tree1;
+var totalTrees = 30; //10
 // Add random trees
-for (s = 0; s < 10; s++) {
+for (s = 0; s < totalTrees; s++) {
     tree1 = new Person('Tree', 'tile-tree1');
     gameboard1.addPerson(tree1);  // add random tree;
 
 }
+
