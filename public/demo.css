@@ -90,6 +90,20 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-size: 100%;
 }
 
+.object-campfire{ 
+    background-image: url(/images-object/object-campfire.gif);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+
+.object-wall1{ 
+    background-image: url(/images-object/object-wall1.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+
 .tile-tree1{ 
     /* Tree added as an object */
     background-image: url(/images-tile/tree1.png);

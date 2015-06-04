@@ -28,7 +28,7 @@
 
         <div class="row well">
             <div class="col-md-9">
-                <strong>Game Board </strong><span id="gb-section-long-lat">1,2</span>
+                <strong>Game Board </strong><span id="gb-section-long-lat"></span>
                 <table id="gameBoard">
                     <tr>
                         <td><div></div></td>
@@ -500,7 +500,7 @@
                         crossDomain: true,
                         success: function (data, status) {
 
-                            log("Move-json:" + data);
+                            //log("Move-json:" + data);
                             var json = JSON.parse(data);
 
                             xPos = json.xPos;  // overwrite from server

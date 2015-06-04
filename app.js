@@ -62,7 +62,7 @@ Gameboard.prototype.addPerson = function (person) {
     // RANDOM placement of new person
     var xRnd, yRnd;
 
-    for (i = 0; i < (this.maxRow * this.maxCol) ; i++) {
+    for (var i = 0; i < (this.maxRow * this.maxCol) ; i++) {
 
         xRnd = Math.floor(Math.random() * (this.maxRow + 1)) + 0;    // i.e. 1-8
         yRnd = Math.floor(Math.random() * (this.maxCol + 1)) + 0;      // i.e. 1- 10
@@ -89,6 +89,18 @@ Gameboard.prototype.addPerson = function (person) {
 
 };
 
+Gameboard.prototype.addPersonFixed = function (person, x, y) {
+    
+    person.xPos = x;
+    person.yPos = y;
+    person.currentGameboard = this;  // bind new person to this particular gameboard
+    person.refreshSection();// Refresh the section co-ordinates they are in.
+
+    this.gameBoardArray[x][y] = person; // put person/object on the gameboard spot!
+
+};
+
+
 Gameboard.prototype.broadcastRefresh = function (person) {
     
     // Call redraw for the whole gameboard
@@ -96,6 +108,21 @@ Gameboard.prototype.broadcastRefresh = function (person) {
         if (personArray[i] != null) personArray[i].emitMovement(); // skip blank
     }
 };
+
+
+Gameboard.prototype.broadcastAI = function (person) {
+    
+    // Call redraw for the whole gameboard
+    for (i = 0; i < personArray.length; i++) {
+        
+        // only move monstor
+        if (personArray[i] != null && personArray[i].icon == 'monster-banana') {
+            personArray[i].movement('down'); // skip blank
+        }
+
+    }
+};
+
 
 
 // GAMEBOARD CLASS END
@@ -146,7 +173,7 @@ Person.prototype.movement = function (action) {
         default:
     }
 
-    if (true) {   // World wrap
+    if (false) {   // World wrap
         if (xPos < 0) xPos = this.currentGameboard.maxRow;
         if (xPos > this.currentGameboard.maxRow) xPos = 0;
         if (yPos < 0) yPos = this.currentGameboard.maxCol;
@@ -189,7 +216,6 @@ Person.prototype.movement = function (action) {
 
         this.xPos = xPos; // assign to new position
         this.yPos = yPos; // assign to new position
-
         this.refreshSection();// Refresh the section co-ordinates person is in now
     
         this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
@@ -309,7 +335,9 @@ app.post('/newGame', function (req, res) {
     //person1.emitMovement();         // Emit new person to all users
     
     gameboard1.broadcastRefresh(); // TO DO: EMIT TO ONLY THE NEW GAME PLAYER
+    
 
+    gameboard1.broadcastAI();// TODO: Monster AI for movement
     
     // TODO : add people to different game boards.
     
@@ -354,13 +382,21 @@ var personIDcounter = 0;
 var GLOBAL_SECTION_SIZE_X = 8;
 var GLOBAL_SECTION_SIZE_Y = 12;
 
-var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 20, GLOBAL_SECTION_SIZE_Y * 20); // row, col  game board size must be in multiples
+var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
 
 /*  Add default player
  * 
     var person1 = new Person('Naomi', 'naomi');
     gameboard1.addPerson(person1);  // Add Naomi to the game board
  */
+
+
+for (var i = 0; i <= 23; i++) {
+    gameboard1.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);  // add random tree;
+
+
+}
+
 var Treasure1 = new Person('Treasure', 'treasure');
 gameboard1.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
 
@@ -368,11 +404,14 @@ gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the
 gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
 
+var campfire1 = new Person('Campfire', 'object-campfire');
+gameboard1.addPerson(campfire1);
+
 
 var tree1;
-var totalTrees = 300; //10
+var totalTrees = 20; //10
 // Add random trees
-for (s = 0; s < totalTrees; s++) {
+for (var s = 0; s < totalTrees; s++) {
     tree1 = new Person('Tree', 'tile-tree1');
     gameboard1.addPerson(tree1);  // add random tree;
 
