@@ -28,7 +28,7 @@
 
         <div class="row well">
             <div class="col-md-9">
-                <strong>Game Board</strong>
+                <strong>Game Board </strong><span id="gb-section-long-lat">1,2</span>
                 <table id="gameBoard">
                     <tr>
                         <td><div></div></td>
@@ -185,6 +185,9 @@
 
     </div>
     <script>
+        var GLOBAL_SECTION_SIZE_X = 8;
+        var GLOBAL_SECTION_SIZE_Y = 12;
+
         var xGBStartPosition = 0;    // x start position
         var yGBStartPosition = 0;   // y start position
 
@@ -212,7 +215,7 @@
                 
             // Listen for server messages.
             socket.on('new movement', function (data) {
-
+                //log('<strong>SERVER:' + data + '</strong>');
                 var json = JSON.parse(data);
                 var index = findInArray(npcArray, json.id);
 
@@ -220,8 +223,10 @@
                     npcArray[index] = json;
                 else
                     npcArray.push(json);
-
-                draw();  // Call the draw
+                
+                // Only draw person on the same gameboard section as you to save performance
+                if (json.xSectionStart == xGBStartPosition && json.ySectionStart == yGBStartPosition)
+                    draw();
 
             })
 
@@ -267,26 +272,47 @@
             $("#button-naomi").click(function () {
                 icon = "naomi";
                 movementRate = 150;
-                draw();
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
+                
+                
             });
 
             $("#button-mia").click(function () {
                 icon = "mia";
                 movementRate = 100;
-                draw();
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
+               
+               
             });
 
             $("#button-monster-banana").click(function () {
-                movementRate = 0;
                 icon = "monster-banana";
-                draw();
+                movementRate = 0;
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
+                
                });
 
 
             $("#button-monster-baby").click(function () {
-                movementRate = 0;
                 icon = "monster-baby";
-                draw();
+                movementRate = 0;
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
             });
 
 
@@ -315,12 +341,15 @@
                     success: function (data, status) {
 
                         var json = JSON.parse(data);                        
-                        log("ser:" + json.id + "," + json.firstName + "," + json.xPos + "," + json.yPos);
 
                         personID = json.id;
                         xPos = json.xPos;  // overwrite from server
                         yPos = json.yPos;  // overwrite from server
-                        draw();  // draw base on server map
+
+                        // Check if different gameboard section, then handle the relocation and re-draw
+                        detectGameboardSectionJump(json.xSectionStart, json.ySectionStart);
+
+                        //draw();  // draw handled by emit
                     },
                     error: function () {
                         draw();  // draw base on local movement
@@ -470,41 +499,20 @@
                         dataType: 'text',   //you may use jsonp for cross origin request
                         crossDomain: true,
                         success: function (data, status) {
-                            //alert(data);
-                            log("json move:" + data);
 
-
+                            log("Move-json:" + data);
                             var json = JSON.parse(data);
-
-                            //log("server: id:" + json.id + " name:" + json.firstName + " x:" + json.xPos + " y:" + json.yPos);
 
                             xPos = json.xPos;  // overwrite from server
                             yPos = json.yPos;  // overwrite from server
+                            icon = json.icon;
 
+                            // Check if different gameboard section, then handle the relocation and re-draw
+                            detectGameboardSectionJump(json.xSectionStart, json.ySectionStart);
 
-                            // TO DO:  Check if user has moved to a different game board section, then initController(initGameBoard()
-                            // Jump to new gameboard
-                            if (json.ySectionStart != yGBStartPosition || json.xSectionStart != xGBStartPosition) {
-                                xGBStartPosition = json.xSectionStart;
-                                yGBStartPosition = json.ySectionStart;
-                                initGameBoard();  // add div #ids
-                                drawItems();      // draw items
-                            }
+                            $("#gb-section-long-lat").html('(' + json.xSectionStart / +GLOBAL_SECTION_SIZE_X + ',' + json.ySectionStart / GLOBAL_SECTION_SIZE_Y + ')') // update gameboard long/lat
 
-                            /*
-                            if (yPos < 12 && yGBStartPosition != 0) { // EXIT STAGE LEFT ONLY!!!!!!!!!!!!!!!!!!
-                                yGBStartPosition = 0;
-                                initGameBoard();  // add div #ids
-                                drawItems();      // draw items
-
-                            }
-                            if (yPos >= 12 && yGBStartPosition != 12) { // EXIT STAGE RIGHT ONLY!!!!!!!!!!!!!!!!!!
-                                yGBStartPosition = 12;
-                                initGameBoard();  // add div #ids
-                                drawItems();      // draw items
-                            }*/
-
-                            draw();  // draw base on server map
+                            //draw();  //No need to draw, as this is handled by the server EMIT 'new message'
                         },
                         error: function () {
                             draw();  // draw base on local movement
@@ -520,21 +528,34 @@
             }  // end if movementRate
         }
 
-        function draw() {
+        
+        // Jump to new gameboard if found in new position
+        function detectGameboardSectionJump(x,y) {
 
+            if (x != xGBStartPosition || y != yGBStartPosition) {
+                    xGBStartPosition = x;
+                    yGBStartPosition = y;
+                    initGameBoard();  // add div #ids
+                    drawItems();      // draw items
+                    draw();
+                }
+        }
+
+        function draw() {
+            
             $("div").removeClass("mia");
             $("div").removeClass("naomi");
             $("div").removeClass("monster-banana");
             $("div").removeClass("monster-baby");
             $("div").removeClass("monster-dino");
             $("div").removeClass("title");
-            //$("#" + xPos + "-" + yPos).addClass(icon);            //$("#" + xPos + "-" + yPos).html("aaa");
 
             // Draw the other players, including self
             for (i = 0; i < npcArray.length; i++)
             {
-                $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);
+                $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);            //$("#" + xPos + "-" + yPos).html("aaa");
                 $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("title", npcArray[i].firstName);
+                //log("array draw:" + i + "-" + npcArray[i].icon);
             }
 
         }

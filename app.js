@@ -59,7 +59,7 @@ Gameboard.prototype.addPerson = function (person) {
     person.yPos = 0;
     person.currentGameboard = this;  // bind new person to this particular gameboard
 
-    // Random placement of new person
+    // RANDOM placement of new person
     var xRnd, yRnd;
 
     for (i = 0; i < (this.maxRow * this.maxCol) ; i++) {
@@ -132,25 +132,32 @@ Person.prototype.movement = function (action) {
 
     switch (action) {
         case "up":
-            xPos -= 1;
-            if (xPos < 1) xPos = 0;
+            xPos--;
             break;
         case "down":
-            xPos += 1;
-            if (xPos > this.currentGameboard.maxRow) xPos = this.currentGameboard.maxRow;
+            xPos++;
             break;
         case "left":
-            yPos -= 1;
-            if (yPos < 1) yPos = 0;
+            yPos--;            
             break;
         case "right":
-            yPos += 1;
-            if (yPos > this.currentGameboard.maxCol) yPos = this.currentGameboard.maxCol;
+            yPos++;
             break;
-
         default:
     }
-    
+
+    if (true) {   // World wrap
+        if (xPos < 0) xPos = this.currentGameboard.maxRow;
+        if (xPos > this.currentGameboard.maxRow) xPos = 0;
+        if (yPos < 0) yPos = this.currentGameboard.maxCol;
+        if (yPos > this.currentGameboard.maxCol) yPos = 0;
+
+    } else { // no world wrap
+        if (xPos < 0) xPos = 0;
+        if (xPos > this.currentGameboard.maxRow) xPos = this.currentGameboard.maxRow;
+        if (yPos < 1) yPos = 0;
+        if (yPos > this.currentGameboard.maxCol) yPos = this.currentGameboard.maxCol;
+    }
 
     
     if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {
@@ -229,11 +236,15 @@ Person.prototype.generateSalt = function () {
 
 Person.prototype.emitMovement = function () {
     
+    
+    // TODO: make string smaller by using smaller field names.
     var strEmit = '{ "id": ' + this.id + 
                 ', "firstName": "' + this.firstName + 
                 '", "icon": "' + this.icon + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
+                ', "xSectionStart": ' + this.xSectionStart + 
+                ', "ySectionStart": ' + this.ySectionStart + 
                 ' }';
     
     io.sockets.emit('new movement', strEmit);
@@ -276,8 +287,8 @@ app.post('/move', function (req, res) {
     var icon            = req.body.icon;
     var str;
     
-    personArray[personID].movement(theDirection);
     personArray[personID].icon = icon;                      // TO DO: allow change of clothes or appearance when equipment is used
+    personArray[personID].movement(theDirection);
 
     str = personArray[personID].parseLocationToJSON();
     
@@ -343,7 +354,7 @@ var personIDcounter = 0;
 var GLOBAL_SECTION_SIZE_X = 8;
 var GLOBAL_SECTION_SIZE_Y = 12;
 
-var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
+var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 20, GLOBAL_SECTION_SIZE_Y * 20); // row, col  game board size must be in multiples
 
 /*  Add default player
  * 
@@ -359,7 +370,7 @@ gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the
 
 
 var tree1;
-var totalTrees = 30; //10
+var totalTrees = 300; //10
 // Add random trees
 for (s = 0; s < totalTrees; s++) {
     tree1 = new Person('Tree', 'tile-tree1');
