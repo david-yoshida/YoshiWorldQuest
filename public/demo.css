@@ -130,6 +130,7 @@ td.tile-grass1{
     background-size: 100%;
 }
 
+
 td.tile-tree1{ 
     background-image: url(/images-tile/tree1.png);
     background-repeat: no-repeat;
@@ -142,3 +143,12 @@ td.tile-tree2{
     background-size: 100%;
 }    
 
+
+/*
+    Background Scenary - Dessert
+*/
+td.tile-sand1{ 
+    background-image: url(/images-tile/sand1.jpg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}

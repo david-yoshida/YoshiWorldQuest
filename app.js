@@ -26,11 +26,9 @@ io.sockets.on('connection', function (socket) {
     console.log('socket.io - connection!');
 
     socket.on('send message', function (data) {
-        
-        console.log('socket.io - send message!' + data);
 
-        io.sockets.emit('new message', data);
-        //io.broadcast.emit('new message', data); do not send to self.
+        io.sockets.emit('new message', data);       //io.broadcast.emit('new message', data); do not send to self.
+        console.log('socket.io - send message!' + data);
     });
 });
 
@@ -38,18 +36,20 @@ io.sockets.on('connection', function (socket) {
 /**
  *      GAMEBOARD CLASS START
  */
-var Gameboard = function (row, col) {
-    this.maxRow = row - 1;
-    this.maxCol = col - 1;
+var Gameboard = function (hashtag, row, col) {
     
-    // Create global array of gameboard
+    this.hashtag    = hashtag;
+    this.maxRow     = row - 1;
+    this.maxCol     = col - 1;
+    
+    // Create global gameboard array
     this.gameBoardArray;
-    
     this.gameBoardArray = new Array(row)
+
     for (i = 0; i < col; i++)
         this.gameBoardArray[i] = new Array(row);
 
-    console.log('Gameboard instantiated');
+    console.log('Gameboard instantiated ' + this.hashtag);
 }
 
 Gameboard.prototype.addPerson = function (person) {
@@ -82,7 +82,8 @@ Gameboard.prototype.addPerson = function (person) {
             break;
         }
     } // end for
-
+    
+    
     if (!success) {
         console.log("ERROR: " + person.firstName + " not added to gameboard");
     }
@@ -220,7 +221,18 @@ Person.prototype.movement = function (action) {
     
         this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
     }
+    
+    
+    if (this.xPos == 2 && this.yPos == 23 & this.currentGameboard.hashtag == '#homestead') {
+        
+        delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];
+        gameboard2.addPersonFixed(this, 2,2); // try to jump person to a fixed position first
 
+        console.log('Jump Point here!: ' + ''); // xxx
+
+    }
+    
+  
 
     console.log('Move: ' + this.firstName + ' (' + this.xPos + '-' + this.yPos + ')');
     
@@ -262,11 +274,11 @@ Person.prototype.generateSalt = function () {
 
 Person.prototype.emitMovement = function () {
     
-    
-    // TODO: make string smaller by using smaller field names.
+    // TODO: make string smaller by using smaller field names. | This could be the same as the parseLocationToJSON function
     var strEmit = '{ "id": ' + this.id + 
                 ', "firstName": "' + this.firstName + 
                 '", "icon": "' + this.icon + 
+                '", "gbName": "' + this.currentGameboard.hashtag + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
                 ', "xSectionStart": ' + this.xSectionStart + 
@@ -281,6 +293,7 @@ Person.prototype.parseLocationToJSON = function () {
     var str = '{ "id": ' + this.id + 
                 ', "firstName": "' + this.firstName + 
                 '", "icon": "' + this.icon + 
+                '", "gbName": "' + this.currentGameboard.hashtag + 
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
                 ', "xSectionStart": ' + this.xSectionStart + 
@@ -335,9 +348,7 @@ app.post('/newGame', function (req, res) {
     //person1.emitMovement();         // Emit new person to all users
     
     gameboard1.broadcastRefresh(); // TO DO: EMIT TO ONLY THE NEW GAME PLAYER
-    
-
-    gameboard1.broadcastAI();// TODO: Monster AI for movement
+    gameboard1.broadcastAI();// TODO: Monster AI for movement, or re-assess some stuff when new player arrives
     
     // TODO : add people to different game boards.
     
@@ -356,7 +367,7 @@ app.post('/newGame', function (req, res) {
 /**
  *  HANDY FUNCTIONS
  */
-// Check if NPC exists
+// Check if NPC exists, if so return person Id
 function findInArray(myArray, id) {
     
     var personExists = -1;
@@ -382,32 +393,33 @@ var personIDcounter = 0;
 var GLOBAL_SECTION_SIZE_X = 8;
 var GLOBAL_SECTION_SIZE_Y = 12;
 
-var gameboard1 = new Gameboard( GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
 
-/*  Add default player
- * 
-    var person1 = new Person('Naomi', 'naomi');
-    gameboard1.addPerson(person1);  // Add Naomi to the game board
+/**
+ *  CREATE FIRST GAMEBOARD - TODO :  LOAD FROM FILE OR SOMETHING
+ *  
+ *  homestead
  */
 
+var gameboard1 = new Gameboard('#homestead', GLOBAL_SECTION_SIZE_X * 1, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
 
+// ADD: fixed object to gameboard, like a wall
 for (var i = 0; i <= 23; i++) {
     gameboard1.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);  // add random tree;
-
-
 }
 
+gameboard1.addPersonFixed(new Person('Treasure', 'treasure'), 2, 22);  // add random tree;
+
+
+// ADD: random treasure box
 var Treasure1 = new Person('Treasure', 'treasure');
 gameboard1.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
 
+// add placeholder
 gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
 gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
 
 
-var campfire1 = new Person('Campfire', 'object-campfire');
-gameboard1.addPerson(campfire1);
-
-
+// add random trees
 var tree1;
 var totalTrees = 20; //10
 // Add random trees
@@ -417,3 +429,24 @@ for (var s = 0; s < totalTrees; s++) {
 
 }
 
+// add random campfire
+var campfire1 = new Person('Campfire', 'object-campfire');
+gameboard1.addPerson(campfire1);
+
+/**
+ *  CREATE SECOND GAMEBOARD
+ *  
+ *  #desert  DY
+ */
+var gameboard2 = new Gameboard('#desert', GLOBAL_SECTION_SIZE_X * 3, GLOBAL_SECTION_SIZE_Y * 3);
+
+// Add random trees
+for (var s = 0; s < 60; s++) {
+    tree1 = new Person('Tree', 'tile-tree1');
+    gameboard2.addPerson(tree1);  // add random tree;
+
+}
+
+// add random campfire
+var campfire2 = new Person('Campfire', 'object-campfire');
+gameboard2.addPerson(campfire2);

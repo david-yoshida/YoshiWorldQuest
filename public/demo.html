@@ -199,6 +199,7 @@
 
         icon = "naomi";
         personID = -1;
+        gbName = "nil";
         movementRate = 100;
         tickCounter = 0;
 
@@ -342,12 +343,13 @@
 
                         var json = JSON.parse(data);                        
 
+                        gbName = json.gbName;
                         personID = json.id;
                         xPos = json.xPos;  // overwrite from server
                         yPos = json.yPos;  // overwrite from server
 
                         // Check if different gameboard section, then handle the relocation and re-draw
-                        detectGameboardSectionJump(json.xSectionStart, json.ySectionStart);
+                        detectGameboardSectionJump(json.gbName, json.xSectionStart, json.ySectionStart);
 
                         //draw();  // draw handled by emit
                     },
@@ -404,12 +406,21 @@
             xCount = xGBStartPosition;
             yCount = yGBStartPosition;
 
+            log("GAMEBOARD:" + gbName);
 
             $("tr").each(function () {
 
                 $.each(this.cells, function () {
                     $(this).attr("id", xCount + "-" + yCount); // TD
-                    $(this).addClass("tile-grass1"); 
+                    
+                    if (gbName == '#desert') {
+                        $(this).addClass("tile-sand1");   // tile-grass1, tile-sand1
+                    } else
+                    {
+                        $(this).addClass("tile-grass1");   // tile-grass1, tile-sand1
+                    }
+
+                    //$(this).addClass("tile-sand1");   // tile-grass1, tile-sand1
 
                     $(this).children('div').attr("id", "P-" + xCount + "-" + yCount); // child DIV
                     $(this).children('div').attr("class", "personHolder");
@@ -503,12 +514,13 @@
                             //log("Move-json:" + data);
                             var json = JSON.parse(data);
 
+                            icon = json.icon;
                             xPos = json.xPos;  // overwrite from server
                             yPos = json.yPos;  // overwrite from server
-                            icon = json.icon;
+
 
                             // Check if different gameboard section, then handle the relocation and re-draw
-                            detectGameboardSectionJump(json.xSectionStart, json.ySectionStart);
+                            detectGameboardSectionJump(json.gbName, json.xSectionStart, json.ySectionStart);
 
                             $("#gb-section-long-lat").html('(' + json.xSectionStart / +GLOBAL_SECTION_SIZE_X + ',' + json.ySectionStart / GLOBAL_SECTION_SIZE_Y + ')') // update gameboard long/lat
 
@@ -530,11 +542,12 @@
 
         
         // Jump to new gameboard if found in new position
-        function detectGameboardSectionJump(x,y) {
+        function detectGameboardSectionJump(hashtag, x,y) {
 
-            if (x != xGBStartPosition || y != yGBStartPosition) {
+            if (x != xGBStartPosition || y != yGBStartPosition || gbName != hashtag) {
                     xGBStartPosition = x;
                     yGBStartPosition = y;
+                    gbName = hashtag;
                     initGameBoard();  // add div #ids
                     drawItems();      // draw items
                     draw();
@@ -553,9 +566,16 @@
             // Draw the other players, including self
             for (i = 0; i < npcArray.length; i++)
             {
+
+                // ONLY DRAW IF SAME GAMEBOARD -  TO DO  - rebuild the npcArray instead for performance
+                if (gbName == npcArray[i].gbName){
+
                 $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);            //$("#" + xPos + "-" + yPos).html("aaa");
                 $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("title", npcArray[i].firstName);
-                //log("array draw:" + i + "-" + npcArray[i].icon);
+
+                    //log("array draw:" + i + "-" + npcArray[i].icon);
+
+                }
             }
 
         }
