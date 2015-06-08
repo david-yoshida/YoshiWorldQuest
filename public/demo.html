@@ -24,6 +24,8 @@
 
         <div class="row well">
             <div class="col-md-3 personName" id="personName" contenteditable>Naomi Yoshida</div>
+
+            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
         </div>
 
         <div class="row well">
@@ -169,10 +171,12 @@
             <button id="button-mia" class="btn btn-default" type="submit">Mia</button>
             <button id="button-monster-banana" class="btn btn-default" type="submit">Monster Banana</button>
             <button id="button-monster-baby" class="btn btn-default" type="submit">Monster Baby</button>
+            <button id="button-monster-mount1" class="btn btn-default" type="submit">Mounted rider 1</button>
+            <button id="button-monster-mount2" class="btn btn-default" type="submit">Mounted rider 2</button>
             <!--<button id="button-monster-dino" class="btn btn-default" type="submit">Monster Dragon</button>-->
             &nbsp;
 
-            <button id="button-random" class="btn btn-default" type="submit">random</button>
+            <button id="button-clear-log" class="btn btn-default" type="submit">Clear log</button>
             
 
             <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
@@ -188,8 +192,8 @@
         var GLOBAL_SECTION_SIZE_X = 8;
         var GLOBAL_SECTION_SIZE_Y = 12;
 
-        var xGBStartPosition = 0;    // x start position
-        var yGBStartPosition = 0;   // y start position
+        var xGBSector = 0; // GB sector co-ordinates
+        var yGBSector = 0; // GB sector co-ordinates
 
         // Init global vars;
         var xPos, yPos, xMax, yMax, icon, personID, tickCounter, movementRate;
@@ -218,15 +222,20 @@
             socket.on('new movement', function (data) {
                 //log('<strong>SERVER:' + data + '</strong>');
                 var json = JSON.parse(data);
+
                 var index = findInArray(npcArray, json.id);
 
-                if (index >= 0) // found!, so update co-ordinates
+                if (index >= 0) { // found!, so update co-ordinates
+
+                    if (json.face == 'fN' || json.face == 'fS') json.face = npcArray[index].face;  // Leave the last facing direction on N and S movement
+                    //if (json.face == 'fN') json.face = npcArray[index].face;  // Leave the last facing direction on N and S movement
                     npcArray[index] = json;
+                }
                 else
                     npcArray.push(json);
                 
                 // Only draw person on the same gameboard section as you to save performance
-                if (json.xSectionStart == xGBStartPosition && json.ySectionStart == yGBStartPosition)
+                if (json.xGBSector == xGBSector && json.yGBSector == yGBSector)
                     draw();
 
             })
@@ -317,16 +326,36 @@
             });
 
 
+            $("#button-monster-mount1").click(function () {
+                icon = "monster-mount1";
+                movementRate = 150;
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
+            });
+
+            $("#button-monster-mount2").click(function () {
+                icon = "monster-mount2";
+                movementRate = 150;
+
+                if (personID > 0) {
+                    npcArray[personID].icon = icon;
+                    draw();
+                }
+            });
+
             $("#button-monster-dino").click(function () {
                 movementRate = 0;
                 icon = "monster-dino";
                 draw();
             });
-
-            $("#button-random").click(function () {
-                alert(Math.floor((Math.random() * 10) + 1));
-            });
             
+            $("#button-clear-log").click(function () {
+                resetLog();
+            });
+
 
 
             $("#button-new-game").click(function () {
@@ -343,13 +372,11 @@
 
                         var json = JSON.parse(data);                        
 
-                        gbName = json.gbName;
                         personID = json.id;
                         xPos = json.xPos;  // overwrite from server
                         yPos = json.yPos;  // overwrite from server
 
-                        // Check if different gameboard section, then handle the relocation and re-draw
-                        detectGameboardSectionJump(json.gbName, json.xSectionStart, json.ySectionStart);
+                        detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
 
                         //draw();  // draw handled by emit
                     },
@@ -364,7 +391,7 @@
             
 
             /*
-            TODO: Launch Modal on monsters.  Using AJAX .load
+            TODO: Launch Modal on items.  Using AJAX .load
             $("td").click(function () {
                 //alert("The td was clicked.");
                 alert(this.id);
@@ -386,6 +413,7 @@
                 alert("Pink Treasure box");
             });
 
+
         });
 
 
@@ -396,15 +424,15 @@
             INITIALIZE THE GAME BOARD
 
             1. Add Co-ordinate to all TDs
-            2. use xGBStartPosition and yGBStartPosition to start the game board co-ordinates
+            2. use xGBSector and yGBSector to start the game board co-ordinates
 
         ***/
         function initGameBoard() {
 
             var xCount, yCount;
 
-            xCount = xGBStartPosition;
-            yCount = yGBStartPosition;
+            xCount = xGBSector;
+            yCount = yGBSector;
 
             log("GAMEBOARD:" + gbName);
 
@@ -414,13 +442,11 @@
                     $(this).attr("id", xCount + "-" + yCount); // TD
                     
                     if (gbName == '#desert') {
-                        $(this).addClass("tile-sand1");   // tile-grass1, tile-sand1
+                        $(this).attr("class", "tile-sand1"); // tile-grass1, tile-sand1
                     } else
                     {
-                        $(this).addClass("tile-grass1");   // tile-grass1, tile-sand1
+                        $(this).attr("class", "tile-grass1"); // tile-grass1, tile-sand1
                     }
-
-                    //$(this).addClass("tile-sand1");   // tile-grass1, tile-sand1
 
                     $(this).children('div').attr("id", "P-" + xCount + "-" + yCount); // child DIV
                     $(this).children('div').attr("class", "personHolder");
@@ -429,7 +455,7 @@
                 });
 
                 xCount ++;
-                yCount = yGBStartPosition;
+                yCount = yGBSector;
             });
 
             xMax = $("tr").size();      // set number of rows
@@ -518,11 +544,9 @@
                             xPos = json.xPos;  // overwrite from server
                             yPos = json.yPos;  // overwrite from server
 
+                            detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
 
-                            // Check if different gameboard section, then handle the relocation and re-draw
-                            detectGameboardSectionJump(json.gbName, json.xSectionStart, json.ySectionStart);
-
-                            $("#gb-section-long-lat").html('(' + json.xSectionStart / +GLOBAL_SECTION_SIZE_X + ',' + json.ySectionStart / GLOBAL_SECTION_SIZE_Y + ')') // update gameboard long/lat
+                            $("#gb-section-long-lat").html('(' + json.xGBSector / +GLOBAL_SECTION_SIZE_X + ',' + json.yGBSector / GLOBAL_SECTION_SIZE_Y + ')') // update gameboard long/lat
 
                             //draw();  //No need to draw, as this is handled by the server EMIT 'new message'
                         },
@@ -533,7 +557,6 @@
 
 
                     log("client:" + xPos + "-" + yPos);
-
                 }
 
                 tickCounter = Date.now();
@@ -544,39 +567,65 @@
         // Jump to new gameboard if found in new position
         function detectGameboardSectionJump(hashtag, x,y) {
 
-            if (x != xGBStartPosition || y != yGBStartPosition || gbName != hashtag) {
-                    xGBStartPosition = x;
-                    yGBStartPosition = y;
+            if (gbName != hashtag || x != xGBSector || y != yGBSector) {
+
                     gbName = hashtag;
-                    initGameBoard();  // add div #ids
-                    drawItems();      // draw items
+                    xGBSector = x;
+                    yGBSector = y;
+
+                    initGameBoard();  // add div #ids, and texture
                     draw();
+                    drawItems();      // draw items
                 }
         }
 
+
+        // The main draw routine
         function draw() {
-            
-            $("div").removeClass("mia");
-            $("div").removeClass("naomi");
-            $("div").removeClass("monster-banana");
-            $("div").removeClass("monster-baby");
-            $("div").removeClass("monster-dino");
-            $("div").removeClass("title");
+
+            $("td div").removeClass("mia");
+            $("td div").removeClass("naomi");
+            $("td div").removeClass("monster-banana");
+            $("td div").removeClass("monster-baby");
+            $("td div").removeClass("monster-dino");
+            $("td div").removeClass("monster-mount1");
+            $("td div").removeClass("monster-mount2");
+            $("td div").removeClass("fN");
+            $("td div").removeClass("fE");
+            $("td div").removeClass("fS");
+            $("td div").removeClass("fW");
+
+
+            //$("td div").removeClass();
+            $("td div").attr("title", "");
+
+            $("td div").off("click");  // remove all onclick events
+
 
             // Draw the other players, including self
             for (i = 0; i < npcArray.length; i++)
             {
+                // ONLY DRAW IF ON THE SAME GAMEBOARD and SECTOR -  TO DO  - rebuild the npcArray instead for performance
+                if (gbName == npcArray[i].gbName && xGBSector == npcArray[i].xGBSector && yGBSector == npcArray[i].yGBSector) {
 
-                // ONLY DRAW IF SAME GAMEBOARD -  TO DO  - rebuild the npcArray instead for performance
-                if (gbName == npcArray[i].gbName){
-
-                $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);            //$("#" + xPos + "-" + yPos).html("aaa");
-                $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("title", npcArray[i].firstName);
+                    $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].icon);            //$("#" + xPos + "-" + yPos).html("aaa");
+                    $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).addClass(npcArray[i].face);
+                    $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("title", npcArray[i].firstName);
 
                     //log("array draw:" + i + "-" + npcArray[i].icon);
+                    //log("DIV:" + "#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos + " " + npcArray[i].icon);
+
+
+                    // TODO: attach an onclick event for special object.  i.e.  if( npcArray[i].modalID != null) 
+                    if (npcArray[i].icon == "monster-mount1")
+                    {
+                        $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).click(function () {
+                            alert("Winter is coming!");
+                        });
+                    }
 
                 }
-            }
+            } // end for
 
         }
 
@@ -595,6 +644,11 @@
             $("#gameBoardLog").prepend(logString + '<br>');
         }
 
+        // Send to gameboard Log
+        function resetLog(logString) {
+            $("#gameBoardLog").html("");
+        }
+
 
         // Check if NPC exists
         function findInArray(myArray, id) {
@@ -609,9 +663,6 @@
             return personExists;
         }
 
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
     </script>
 </body>
 </html>
