@@ -174,3 +174,59 @@ td.tile-sand1{
     background-repeat: no-repeat;
     background-size: 100%;
 }
+
+
+
+
+
+
+.modal-header {
+    background-color: #00a4e3;
+    border-bottom: medium none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    text-align: center;
+}
+.modal-header .close {
+    color: #ffffff;
+    font-size: 30px;
+    margin-top: 0;
+    opacity: 0.5;
+    text-shadow: 0 1px 0 #000000;
+}
+.modal-header .close:hover {
+    color: #ffffff;
+    opacity: 1;
+    text-shadow: 0 1px 0 #000000;
+}
+.modal-title {
+    color: #ffffff;
+}
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+h1 {
+    font-family: "Roboto","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.5em;
+}
+h2 {
+    font-family: "Roboto","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.5em;
+}
+h3 {
+    font-family: "Roboto","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.5em;
+}
+
+
+img.incopy-graphic {
+    margin: 20px 0;
+    width: 100%;
+}

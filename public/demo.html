@@ -177,6 +177,7 @@
             &nbsp;
 
             <button id="button-clear-log" class="btn btn-default" type="submit">Clear log</button>
+            <button id="button-modal" class="btn btn-default" type="submit">Launch Modal</button>
             
 
             <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
@@ -188,6 +189,29 @@
         </div>
 
     </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h1 class="modal-title" id="myModalLabel">Modal title</h1>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer center">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Attack</button>
+                    <button type="button" class="btn btn-primary">Enter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         var GLOBAL_SECTION_SIZE_X = 8;
         var GLOBAL_SECTION_SIZE_Y = 12;
@@ -356,6 +380,12 @@
                 resetLog();
             });
 
+            $("#button-modal").click(function () {
+
+                modal("monster-mount1");
+
+            });
+
 
 
             $("#button-new-game").click(function () {
@@ -407,12 +437,6 @@
 
             draw();         // first draw people
             drawItems();    // second draw objects
-
-
-            $("#7-7").click(function () {
-                alert("Pink Treasure box");
-            });
-
 
         });
 
@@ -619,9 +643,15 @@
                     // TODO: attach an onclick event for special object.  i.e.  if( npcArray[i].modalID != null) 
                     if (npcArray[i].icon == "monster-mount1")
                     {
+                        
+                        $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("icon", npcArray[i].icon);
+
                         $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).click(function () {
-                            alert("Winter is coming!");
+
+                            modal($(this).attr("icon"));
                         });
+
+                        
                     }
 
                 }
@@ -638,6 +668,19 @@
             $("#7-7").addClass("tile-tree2");
 
         }
+
+
+        // Call modal - Describe objects, items, special activities
+        function modal(keyName) {
+
+            var loadTheModalURL = "/modalResponse.html #" + keyName;  // keep the # mark
+
+            $("#myModalLabel").html("Description");
+            $(".modal-body").load(loadTheModalURL); // call XXX
+            $("#myModal").modal("show");
+        }
+
+
 
         // Send to gameboard Log
         function log(logString) {

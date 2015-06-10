@@ -144,6 +144,7 @@ var Person = function (firstName, icon) {
     this.firstName = firstName;
     this.icon = icon;
     this.face = 'E'; // S - South by default
+    this.tickCount = 0;
     this.xPos;
     this.yPos;
     this.xSectionStart;
@@ -245,7 +246,9 @@ Person.prototype.movement = function (action) {
 
 
     console.log('Move: ' + this.firstName + ' (' + this.xPos + '-' + this.yPos + ')');
+    console.log('Tick: ' + this.tickCount);
     
+    this.tickCount++;
     this.emitMovement(); // Send movement to all players
 
 }
