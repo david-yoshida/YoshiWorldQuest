@@ -58,7 +58,6 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-size: 100%;
 }
 
-
 .naomi{ 
     background-image: url(/images-character/naomi.png);
     background-repeat: no-repeat;
@@ -83,26 +82,27 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-size: 100%;
 }
 
-.monster-mount1.fE{ 
-    transform: scaleX(-1); filter: FlipH; -ms-filter: "FlipH"; float: none;
-}
-
-
 .monster-mount2{ 
     background-image: url(/images-character/monster-mount3.png); 
     background-repeat: no-repeat;
     background-size: 100%;
 }
 
-.monster-mount2.fE{ 
-    transform: scaleX(-1); filter: FlipH; -ms-filter: "FlipH"; float: none;
-}
-
-
 .monster-dino{ 
     background-image: url(/images-character/monster-dino.gif); 
     background-repeat: no-repeat;
     background-size: 100%;
+}
+
+.monster-zombie1{ 
+    background-image: url(/images-character/monster-zombie1.gif); 
+    background-repeat: no-repeat;
+    background-size: 130%;
+    background-position: -20px -3px;
+}
+
+.fE{ 
+    transform: scaleX(-1); filter: FlipH; -ms-filter: "FlipH"; float: none;
 }
 
 

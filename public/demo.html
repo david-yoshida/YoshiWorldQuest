@@ -14,7 +14,6 @@
     <script src="/socket.io/socket.io.js"></script>
     <!--Custom CSS-->
     <link rel="stylesheet" type="text/css" href="demo.css">
-
 </head>
 
 <body>
@@ -24,8 +23,13 @@
 
         <div class="row well">
             <div class="col-md-3 personName" id="personName" contenteditable>Naomi Yoshida</div>
+            <div class="col-md-6"> Players <span class="badge">4</span></div>
+            <div class="col-md-3">
+                
+            </div>
 
-            <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right" title="Tooltip on right">Tooltip on right</button>
+
+            
         </div>
 
         <div class="row well">
@@ -167,20 +171,14 @@
             <button id="button-down" class="btn btn-default" type="submit">Down</button> 
             &nbsp;
 
-            <button id="button-naomi" class="btn btn-default" type="submit">Naomi</button>
-            <button id="button-mia" class="btn btn-default" type="submit">Mia</button>
-            <button id="button-monster-banana" class="btn btn-default" type="submit">Monster Banana</button>
-            <button id="button-monster-baby" class="btn btn-default" type="submit">Monster Baby</button>
-            <button id="button-monster-mount1" class="btn btn-default" type="submit">Mounted rider 1</button>
-            <button id="button-monster-mount2" class="btn btn-default" type="submit">Mounted rider 2</button>
-            <!--<button id="button-monster-dino" class="btn btn-default" type="submit">Monster Dragon</button>-->
-            &nbsp;
-
             <button id="button-clear-log" class="btn btn-default" type="submit">Clear log</button>
             <button id="button-modal" class="btn btn-default" type="submit">Launch Modal</button>
             
 
+            
             <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
+            <button id="button-attack-hit" class="btn btn-default" type="submit">Attack hit</button>
+            
         </div>
 
 
@@ -203,9 +201,14 @@
                     ...
                 </div>
                 <div class="modal-footer center">
+
                     <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
+                    <button id="button-start-game" class="btn btn-default" type="submit" data-dismiss="modal">Start New Game</button>
+                    &nbsp;
                     <button type="button" class="btn btn-primary">Attack</button>
                     <button type="button" class="btn btn-primary">Enter</button>
+
+                   
                 </div>
             </div>
         </div>
@@ -285,9 +288,7 @@
 
 
             $("#button-left").click(function () {
-                //socket.emit('send message', 'Hello again Socket!');
                 movement('left');
-                
             });
 
             $("#button-right").click(function () {
@@ -302,86 +303,14 @@
                 movement('down')
             });
 
-            // NPC Test
-            $("#button-naomi").click(function () {
-                icon = "naomi";
-                movementRate = 150;
 
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-                
-                
-            });
-
-            $("#button-mia").click(function () {
-                icon = "mia";
-                movementRate = 100;
-
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-               
-               
-            });
-
-            $("#button-monster-banana").click(function () {
-                icon = "monster-banana";
-                movementRate = 0;
-
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-                
-               });
-
-
-            $("#button-monster-baby").click(function () {
-                icon = "monster-baby";
-                movementRate = 0;
-
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-            });
-
-
-            $("#button-monster-mount1").click(function () {
-                icon = "monster-mount1";
-                movementRate = 150;
-
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-            });
-
-            $("#button-monster-mount2").click(function () {
-                icon = "monster-mount2";
-                movementRate = 150;
-
-                if (personID > 0) {
-                    npcArray[personID].icon = icon;
-                    draw();
-                }
-            });
-
-            $("#button-monster-dino").click(function () {
-                movementRate = 0;
-                icon = "monster-dino";
-                draw();
-            });
             
             $("#button-clear-log").click(function () {
                 resetLog();
             });
 
             $("#button-modal").click(function () {
-
+                alert("hi");
                 modal("monster-mount1");
 
             });
@@ -389,6 +318,24 @@
 
 
             $("#button-new-game").click(function () {
+                modal("start-game");
+            });
+
+
+            $("#button-attack-hit").click(function () {
+                $('body').css('background-color', 'red');
+                
+                setTimeout(function () {
+                    //    $rows.removeClass("pageLoad");
+                    $('body').css('background-color', 'lightblue');
+                }, 500);
+
+            });
+
+
+
+
+            $("#button-start-game").click(function () {
 
                 //  New game request
                 $.ajax({
@@ -419,6 +366,7 @@
             });
 
             
+
 
             /*
             TODO: Launch Modal on items.  Using AJAX .load
@@ -514,6 +462,19 @@
 
             // To Do: inventory hotkey?
 
+        }
+
+
+        //  NEW GAME
+        function modalSelectPerson(modalName, modalRate) {
+
+            icon = modalName;
+            movementRate = modalRate;
+
+            if (personID > 0) {
+                npcArray[personID].icon = icon;
+                draw();
+            }
         }
 
         function initStartPosition() {
@@ -614,6 +575,7 @@
             $("td div").removeClass("monster-dino");
             $("td div").removeClass("monster-mount1");
             $("td div").removeClass("monster-mount2");
+            $("td div").removeClass("monster-zombie1");
             $("td div").removeClass("fN");
             $("td div").removeClass("fE");
             $("td div").removeClass("fS");
@@ -673,10 +635,10 @@
         // Call modal - Describe objects, items, special activities
         function modal(keyName) {
 
-            var loadTheModalURL = "/modalResponse.html #" + keyName;  // keep the # mark
+            var loadTheModalURL = "/modalResponse.html?" + Date.now() + " #" + keyName;  // keep the # mark
 
             $("#myModalLabel").html("Description");
-            $(".modal-body").load(loadTheModalURL); // call XXX
+            $(".modal-body").load(loadTheModalURL);
             $("#myModal").modal("show");
         }
 
