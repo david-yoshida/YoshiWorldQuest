@@ -107,10 +107,112 @@ app.post('/newGame', function (req, res) {
 
 
 
+/**
+*  CREATE FIRST GAMEBOARD - TODO :  LOAD FROM FILE OR SOMETHING
+*  
+*           #homestead
+*/
+function createGameboard1() {
+
+    // New Gameboard
+    var gb = new Gameboard('#homestead', GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
+
+    // add to master gameboard array
+    gameboardArray["#homestead"] = gb;
+
+    // ADD: fixed object to gameboard, like a wall
+    for (var i = 0; i <= 23; i++) {
+        gb.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);
+    }
+
+    // ADD: The jump point
+    gb.addPersonFixed(new Person('wormhole', 'object-ladder'), 7, 7); 
+    gb.addTeleportPoint("#desert", "object-ladder", 7,7, 15,15);  // teleport to #desert gameboard
+
+
+
+    gb.addPersonFixed(new Person('Treasure', 'treasure'), 2, 22);  // add random tree;
 
 
 
 
+    // ADD: random treasure box
+    var Treasure1 = new Person('Treasure', 'treasure');
+    gb.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
+
+    // add manual tree
+    gb.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board manually
+
+
+    // add random trees
+    var tree1;
+    var totalTrees = 20; //10
+    // Add random trees
+    for (var s = 0; s < totalTrees; s++) {
+        tree1 = new Person('Tree', 'tile-tree1');
+        gb.addPerson(tree1);  // add random tree;
+
+    }
+
+    // add random campfire
+    var campfire1 = new Person('Campfire', 'object-campfire');
+    gb.addPerson(campfire1);
+
+
+    return gb;
+}
+
+
+
+
+/**
+*  CREATE SECOND GAMEBOARD
+*  
+*           #desert
+*/
+
+function createGameboard2() {
+
+    // New Gameboard
+    var gb = new Gameboard('#desert', GLOBAL_SECTION_SIZE_X * 3, GLOBAL_SECTION_SIZE_Y * 3);
+
+    // add to master gameboard array
+    gameboardArray["#desert"] = gb;
+
+
+    // Jump point
+    gb.addPersonFixed(new Person('wormhole', 'object-ladder'), 7, 7);
+    gb.addTeleportPoint("#homestead", "object-ladder", 7, 7, 15, 15);  // teleport to #desert gameboard
+
+
+    // ADD: fixed object to gameboard, like a wall
+    for (var i = 0; i <= GLOBAL_SECTION_SIZE_Y * 3; i++) {
+        gb.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);    // top wall
+        gb.addPersonFixed(new Person('Wall', 'object-wall1'), 23, i);   // bottom wall
+        //gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 0);    // west wall
+        //gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 23);   // east wall
+    }
+
+
+    // ADD: fixed object to gameboard, like a wall
+    for (var i = 1; i <= GLOBAL_SECTION_SIZE_Y * 3 - 1; i++) {
+        gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 0);    // west wall
+        gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 35);   // east wall
+    }
+
+
+    // Add random trees
+    for (var s = 0; s < 30; s++) {
+        // add random campfire
+        var campfire2 = new Person('Campfire', 'object-campfire');
+        gb.addPerson(campfire2);
+
+    }
+
+
+
+    return gb;
+}
 
 
 
@@ -123,64 +225,14 @@ app.post('/newGame', function (req, res) {
  *  MAIN SETUP HERE
  */
 GLOBAL.personArray = new Array(0);
-GLOBAL.personIDcounter              = 0;
+GLOBAL.personIDcounter = 0;
+
+GLOBAL.gameboardArray = new Array(0);
+
 GLOBAL.GLOBAL_SECTION_SIZE_X        = 8;
 GLOBAL.GLOBAL_SECTION_SIZE_Y        = 12;
 
 
-/**
- *  CREATE FIRST GAMEBOARD - TODO :  LOAD FROM FILE OR SOMETHING
- *  
- *  homestead
- */
+var gameboard1 = createGameboard1();  // #homestead
+var gameboard2 = createGameboard2();  // #desert
 
-var gameboard1 = new Gameboard('#homestead', GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2); // row, col  game board size must be in multiples
-
-// ADD: fixed object to gameboard, like a wall
-for (var i = 0; i <= 23; i++) {
-    gameboard1.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);  // add random tree;
-}
-
-gameboard1.addPersonFixed(new Person('Treasure', 'treasure'), 2, 22);  // add random tree;
-
-
-// ADD: random treasure box
-var Treasure1 = new Person('Treasure', 'treasure');
-gameboard1.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
-
-// add placeholder
-gameboard1.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board
-gameboard1.gameBoardArray[7][7] = Treasure1;  // Add Treasure placeholder to the game board
-
-
-// add random trees
-var tree1;
-var totalTrees = 20; //10
-// Add random trees
-for (var s = 0; s < totalTrees; s++) {
-    tree1 = new Person('Tree', 'tile-tree1');
-    gameboard1.addPerson(tree1);  // add random tree;
-
-}
-
-// add random campfire
-var campfire1 = new Person('Campfire', 'object-campfire');
-gameboard1.addPerson(campfire1);
-
-/**
- *  CREATE SECOND GAMEBOARD
- *  
- *  #desert  DY
- */
-var gameboard2 = new Gameboard('#desert', GLOBAL_SECTION_SIZE_X * 2, GLOBAL_SECTION_SIZE_Y * 2);
-
-// Add random trees
-for (var s = 0; s < 30; s++) {
-    tree1 = new Person('Tree', 'tile-tree1');
-    gameboard2.addPerson(tree1);  // add random tree;
-
-}
-
-// add random campfire
-var campfire2 = new Person('Campfire', 'object-campfire');
-gameboard2.addPerson(campfire2);

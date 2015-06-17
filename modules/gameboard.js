@@ -10,14 +10,20 @@
     
     this.hashtag    = hashtag;
     this.maxRow     = row - 1;
-    this.maxCol     = col - 1;
+    this.maxCol = col - 1;    
     
-    // Create global gameboard array
-    this.gameBoardArray;
+    // Create gameboard array
     this.gameBoardArray = new Array(row)
 
     for (i = 0; i < col; i++)
         this.gameBoardArray[i] = new Array(row);
+    
+    // Create action array - store teleports
+    this.actionArray = new Array(row);
+    for (i = 0; i < col; i++)
+        this.actionArray[i] = new Array(row);
+    
+
 
     console.log('Gameboard instantiated ' + this.hashtag);
 }
@@ -94,6 +100,42 @@ Gameboard.prototype.broadcastAI = function (person) {
     }
 };
 
+
+// create teleport jump points on this gameboard
+Gameboard.prototype.addTeleportPoint = function (gb_hashtag, icon, xPos, yPos, to_xPos, to_yPos) {
+    
+    var teleportItem = {
+        actionName: "teleport",
+        to_hashtag: gb_hashtag,
+        icon: icon,
+        to_xPos : to_xPos,
+        to_yPos : to_yPos
+    };
+    
+    this.actionArray[xPos][yPos] = teleportItem;
+
+};
+
+
+// When a play moves into a square, check for a special action like teleport.
+Gameboard.prototype.checkSpecialAction = function (person, xPos, yPos) {
+
+    // Check for special action
+    if (this.actionArray[xPos][yPos] != null) {
+            
+        act = this.actionArray[xPos][yPos];
+
+        if (act.actionName == 'teleport'){  // jump code here.
+
+            delete this.gameBoardArray[person.xPos][person.yPos];
+            gameboardArray[act.to_hashtag].addPersonFixed(person, act.to_xPos, act.to_yPos); // try to jump person to a fixed position first
+            console.log('Perform Teleport!: ' + ''); 
+        }
+
+    }
+
+
+};
 
 
 

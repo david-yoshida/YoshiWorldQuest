@@ -126,6 +126,12 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
 }
 
 
+.object-ladder{ 
+    background-image: url(/images-object/object-ladder.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
 .tile-tree1{ 
     /* Tree added as an object */
     background-image: url(/images-tile/tree1.png);

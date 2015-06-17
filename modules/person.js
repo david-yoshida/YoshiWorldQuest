@@ -68,9 +68,9 @@ Person.prototype.movement = function (action) {
     }
 
     
-    if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {
-        console.log("Blocked:Something here!");
+    if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {  // BLOCKED SOMETHING THERE!
         
+        console.log("Blocked:Something here!");
         
         // Kill the bannana, as long as you are not the bananna
         if (this.icon != "monster-banana" && this.currentGameboard.gameBoardArray[xPos][yPos].icon == "monster-banana") {
@@ -90,6 +90,11 @@ Person.prototype.movement = function (action) {
             delete GLOBAL.personArray[monster1.id];                            // delete from person array, but keep stucture. TO DO:  issue person array keeps growing, never get's smaller
             delete this.currentGameboard.gameBoardArray[xPos][yPos];    // delete from game board
         }
+
+
+        // Check for anything special like a teleport
+        this.currentGameboard.checkSpecialAction(this, xPos, yPos);
+
 
     } else {
 
