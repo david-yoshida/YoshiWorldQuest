@@ -16,7 +16,8 @@ var Person = function (firstName, icon) {
     this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
     this.icon = icon;
-    this.face = 'E'; // S - South by default
+    this.isMonster = false;
+    this.face = 'fE'; // S - South by default
     this.tickCount = 0;
     this.xPos;
     this.yPos;
@@ -29,6 +30,8 @@ var Person = function (firstName, icon) {
 };
 
 Person.prototype.movement = function (action) {
+
+    //TODO:  Limit movement server side too, it will help limit monster speed
 
     var xPos = this.xPos; // assign global to local variable
     var yPos = this.yPos; // assign global to local variable
@@ -131,6 +134,30 @@ Person.prototype.movement = function (action) {
 
 }
 
+// Current direction base on face
+Person.prototype.getCurrentDirection = function () {
+
+    var str = this.face;
+
+    switch (this.face) {
+        case "fN":
+            str = 'up';
+            break;
+        case "fS":
+            face = 'down';
+            break;
+        case "fW":
+            face = 'left';
+            break;
+        case "fE":
+            face = 'right';
+            break;
+        default:
+    }
+
+    return str;
+}
+
 
 // Refresh the gameboard section person is on
 Person.prototype.refreshSection = function () {
@@ -185,6 +212,15 @@ Person.prototype.parseLocationToJSON = function () {
                 ' }';  // i.e. var str = '{ "name": "John Doe", "age": 42 }';
 
     return str;
+}
+
+// Set as a monster
+Person.prototype.setAsMonster = function () {
+
+    this.isMonster = true;
+
+    // this.aggressive level 0-10
+    // this.intelligence level 0-10
 }
 
 

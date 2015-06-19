@@ -13,11 +13,13 @@ var bodyParser = require('body-parser');
 require('./modules/utils.js');
 var Person = require('./modules/person.js');
 var Gameboard = require('./modules/gameboard.js');
+var GameClock = require('./modules/gameclock.js');
 
 // Start Webserver
 var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/public')); // Folder For static / content
+
 
 var server = require('http').createServer(app)
 server.listen(3000, function () {
@@ -47,13 +49,6 @@ io.sockets.on('connection', function (socket) {
 
 
 
-
-
-
-
-
-
-
 /**
  *  WEB SERVICE CALLS
  */
@@ -76,6 +71,10 @@ app.post('/move', function (req, res) {
     // Write to browser
     res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
     res.end(str);
+    
+    
+    // After each movement call the gameTick() to advance various server side objects
+    gameTick();
 
 });
 
@@ -119,6 +118,16 @@ function createGameboard1() {
 
     // add to master gameboard array
     gameboardArray["#homestead"] = gb;
+    
+    
+    // Create a monster
+    p = new Person('Enemy', 'monster-mount1');
+    p.setAsMonster();
+    
+
+    gb.addPersonFixed(p, 4, 4);
+    
+
 
     // ADD: fixed object to gameboard, like a wall
     for (var i = 0; i <= 23; i++) {
@@ -179,22 +188,19 @@ function createGameboard2() {
     // add to master gameboard array
     gameboardArray["#desert"] = gb;
 
+   
 
-    // Jump point
+    // Add jump point
     gb.addPersonFixed(new Person('wormhole', 'object-ladder'), 7, 7);
     gb.addTeleportPoint("#homestead", "object-ladder", 7, 7, 15, 15);  // teleport to #desert gameboard
 
 
-    // ADD: fixed object to gameboard, like a wall
+    // Create Fixed position wall
     for (var i = 0; i <= GLOBAL_SECTION_SIZE_Y * 3; i++) {
         gb.addPersonFixed(new Person('Wall', 'object-wall1'), 0, i);    // top wall
         gb.addPersonFixed(new Person('Wall', 'object-wall1'), 23, i);   // bottom wall
-        //gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 0);    // west wall
-        //gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 23);   // east wall
     }
 
-
-    // ADD: fixed object to gameboard, like a wall
     for (var i = 1; i <= GLOBAL_SECTION_SIZE_Y * 3 - 1; i++) {
         gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 0);    // west wall
         gb.addPersonFixed(new Person('Wall', 'object-wall1'), i, 35);   // east wall
@@ -209,15 +215,24 @@ function createGameboard2() {
 
     }
 
-
-
     return gb;
 }
 
+// call the game tick
+function gameTick() {
+
+    gc.helloWorld();
+    // Step 1. Move
+    gc.moveMonsters(personArray);  // TODO:  gc.moveMonster(gameboardHashtag) to move the monsters on a particular gameboard.
 
 
+    // Step 2. Attack or Spells
 
 
+    // Other system clean up? spawn
+
+
+}
 
 
 
@@ -235,4 +250,7 @@ GLOBAL.GLOBAL_SECTION_SIZE_Y        = 12;
 
 var gameboard1 = createGameboard1();  // #homestead
 var gameboard2 = createGameboard2();  // #desert
+
+
+var gc = new GameClock(); // Create the game clock
 
