@@ -140,17 +140,10 @@ function createGameboard1() {
 
 
 
-    gb.addPersonFixed(new Person('Treasure', 'treasure'), 2, 22);  // add random tree;
+    gb.addPersonFixed(new Person('Treasure Box', 'object-treasurebox1'), 2, 22);  // add random treasure box;
 
+    gb.addPerson(new Person('Treasure', 'object-treasurebox1'));  // Person and object are treated the same, so the client.html does not crash during a draw();
 
-
-
-    // ADD: random treasure box
-    var Treasure1 = new Person('Treasure', 'treasure');
-    gb.addPerson(Treasure1);  // Person and object are treated the same, so the client.html does not crash during a draw();
-
-    // add manual tree
-    gb.gameBoardArray[3][3] = Treasure1;  // Add Treasure placeholder to the game board manually
 
 
     // add random trees

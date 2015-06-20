@@ -48,6 +48,10 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
 }
 */
 
+.center{
+    text-align: center;
+}
+
 .personHolder {
     width: 48px; height: 48px;
 }
@@ -130,6 +134,13 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-image: url(/images-object/object-ladder.png);
     background-repeat: no-repeat;
     background-size: 100%;
+}
+
+.object-treasurebox1{ 
+    background-image: url(/images-object/object-treasurebox1.png?d=test);
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: bottom 10px;
 }
 
 .tile-tree1{ 

@@ -43,7 +43,7 @@ GameClock.prototype.moveMonsters = function (personArray) {
 
     // TODO: use a monster array for each gameboard to improve performance, and only move if there is a character on the same grid.
 
-    // TODO: Create IA for various behaviour type (Sticky, Wander, Aggressive, etc.)
+    // TODO: Create IA for various behaviour type (Sticky, Wander, Aggressive, Slow poke, etc.)
 
     for (i = 0; i < personArray.length; i++) {
         if(personArray[i].isMonster) {

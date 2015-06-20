@@ -175,7 +175,6 @@
             <button id="button-modal" class="btn btn-default" type="submit">Launch Modal</button>
             
 
-            
             <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
             <button id="button-attack-hit" class="btn btn-default" type="submit">Attack hit</button>
             
@@ -202,11 +201,11 @@
                 </div>
                 <div class="modal-footer center">
 
-                    <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
-                    <button id="button-start-game" class="btn btn-default" type="submit" data-dismiss="modal">Start New Game</button>
+                    <button id="btn-modal-close" type="button" class="btn btn-success btn-modal" data-dismiss="modal">Close</button>
+                    <button id="btn-modal-start-game" class="btn btn-default btn-modal" type="submit" data-dismiss="modal">Start New Game</button>
                     &nbsp;
-                    <button type="button" class="btn btn-primary">Attack</button>
-                    <button type="button" class="btn btn-primary">Enter</button>
+                    <button id="btn-modal-attack" type="button" class="btn btn-primary btn-modal">Attack</button>
+                    <button id="btn-modal-enter" type="button" class="btn btn-primary btn-modal">Enter</button>
 
                    
                 </div>
@@ -310,15 +309,14 @@
             });
 
             $("#button-modal").click(function () {
-                alert("hi");
                 modal("monster-mount1");
-
             });
 
 
 
             $("#button-new-game").click(function () {
-                modal("start-game");
+
+                modal("start-game", new Array("btn-modal-close", "btn-modal-start-game"));
             });
 
 
@@ -335,7 +333,7 @@
 
 
 
-            $("#button-start-game").click(function () {
+            $("#btn-modal-start-game").click(function () {
 
                 //  New game request
                 $.ajax({
@@ -607,13 +605,17 @@
                     {
                         
                         $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("icon", npcArray[i].icon);
-
                         $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).click(function () {
-
                             modal($(this).attr("icon"));
                         });
 
                         
+                    } else if (npcArray[i].icon == "object-treasurebox1") {
+
+                        $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("icon", npcArray[i].icon);
+                        $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).click(function () {
+                            modal($(this).attr("icon"));
+                        });
                     }
 
                 }
@@ -625,17 +627,27 @@
         // Draw item routine
         function drawItems() {
             $("td").removeClass("tile-tree1");
-            $("#3-3").addClass("tile-tree1");
             $("td").removeClass("tile-tree2");
 
-            //$("#7-7").addClass("tile-tree2");
-            $("#5-5").addClass("tile-tree2");
+            //$("#3-3").addClass("tile-tree1");
+            //$("#5-5").addClass("tile-tree2");
 
         }
 
 
         // Call modal - Describe objects, items, special activities
-        function modal(keyName) {
+        function modal(keyName, btnArray) {
+
+            $(".btn-modal").hide();
+
+            if (typeof btnArray != 'undefined') 
+            {
+                for (i = 0; i < btnArray.length; i++) {  // activate modal buttons
+                    $("#" + btnArray[i]).show();
+                }
+            } else {
+                $("#btn-modal-close").show();
+            }
 
             var loadTheModalURL = "/modalResponse.html?" + Date.now() + " #" + keyName;  // keep the # mark
 
