@@ -46,7 +46,7 @@ GameClock.prototype.moveMonsters = function (personArray) {
     // TODO: Create IA for various behaviour type (Sticky, Wander, Aggressive, Slow poke, etc.)
 
     for (i = 0; i < personArray.length; i++) {
-        if(personArray[i].isMonster) {
+        if(personArray[i].isMonster && personArray[i].ai == 'wandering') {
             console.log("Found Monster!" + personArray[i].firstName);
            
 

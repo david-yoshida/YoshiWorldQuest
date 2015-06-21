@@ -1,5 +1,8 @@
 body {
     background-color: lightblue;
+    background: url(/images-background/test.jpg);
+     background-repeat: no-repeat;
+         background-size: 100%;
 }
 
 h1 {
@@ -103,6 +106,12 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
     background-repeat: no-repeat;
     background-size: 130%;
     background-position: -20px -3px;
+}
+
+.monster-crow1{ 
+    background-image: url(/images-character/monster-crow1.gif); 
+    background-repeat: no-repeat;
+    background-size: 50%;
 }
 
 .fE{ 

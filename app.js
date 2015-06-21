@@ -12,6 +12,7 @@ var bodyParser = require('body-parser');
 // Import User Defined Classes
 require('./modules/utils.js');
 var Person = require('./modules/person.js');
+var MonsterManual = require('./modules/MonsterManual.js');
 var Gameboard = require('./modules/gameboard.js');
 var GameClock = require('./modules/gameclock.js');
 
@@ -20,6 +21,9 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/public')); // Folder For static / content
 
+// Create Monster manaul
+
+var mm = new MonsterManual();
 
 var server = require('http').createServer(app)
 server.listen(3000, function () {
@@ -123,10 +127,20 @@ function createGameboard1() {
     // Create a monster
     p = new Person('Enemy', 'monster-mount1');
     p.setAsMonster();
-    
-
     gb.addPersonFixed(p, 4, 4);
     
+
+    // Create some monsters
+    gb.addPersonFixed(mm.createKnight(), 5, 5);
+    gb.addPersonFixed(mm.createCrow(), 6, 6);
+    
+    for (var aa = 0; aa < 20; aa++) {
+
+        gb.addPerson(mm.createKnight());  
+        gb.addPerson(mm.createCrow());
+
+    }
+
 
 
     // ADD: fixed object to gameboard, like a wall

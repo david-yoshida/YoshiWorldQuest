@@ -3,8 +3,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title></title>
+    <!-- Include meta tag to ensure proper rendering and touch zooming -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Yoshi Adventure Quest</title>
+
+    <!-- Include jQuery Mobile stylesheets -->
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">-->
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+    <!-- Include the jQuery Mobile library -->
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
     <!-- Optional theme -->
@@ -151,9 +162,33 @@
                 </table>
             </div>
             <div class="col-md-3">
+
+                <table>
+                    <tr>
+                        <td></td>
+                        <td><button id="button-up" class="btn btn-default" type="submit" data-icon="arrow-u">&nbsp;</button></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><button id="button-left" class="btn btn-default" type="submit" data-icon="arrow-l">&nbsp;</button></td>
+                        <td></td>
+                        <td><button id="button-right" class="btn btn-default" type="submit" data-icon="arrow-r">&nbsp;</button></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button id="button-down" class="btn btn-default" type="submit" data-icon="arrow-d">&nbsp;</button></td>
+                        <td></td>
+                    </tr>
+
+                </table>
+                
+               
+                <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
+
+
                 <strong>Game Log</strong>
                 <div id="gameBoardLog" class="gameBoardLog">
-                   
+
 
                     <ul>
                         <li>Console interface - chat area?</li>
@@ -164,18 +199,9 @@
             </div>
         </div>
         <div class="row well">
-            <strong>Controls</strong>
-            <button id="button-left" class="btn btn-default" type="submit">Left</button> 
-            <button id="button-right" class="btn btn-default" type="submit">Right</button> 
-            <button id="button-up" class="btn btn-default" type="submit">Up</button> 
-            <button id="button-down" class="btn btn-default" type="submit">Down</button> 
-            &nbsp;
 
             <button id="button-clear-log" class="btn btn-default" type="submit">Clear log</button>
             <button id="button-modal" class="btn btn-default" type="submit">Launch Modal</button>
-            
-
-            <button id="button-new-game" class="btn btn-default" type="submit">New Game</button>
             <button id="button-attack-hit" class="btn btn-default" type="submit">Attack hit</button>
             
         </div>
@@ -230,7 +256,7 @@
         icon = "naomi";
         personID = -1;
         gbName = "nil";
-        movementRate = 100;
+        movementRate = 150;
         tickCounter = 0;
 
 
@@ -574,6 +600,7 @@
             $("td div").removeClass("monster-mount1");
             $("td div").removeClass("monster-mount2");
             $("td div").removeClass("monster-zombie1");
+            $("td div").removeClass("monster-crow1");
             $("td div").removeClass("fN");
             $("td div").removeClass("fE");
             $("td div").removeClass("fS");
@@ -600,8 +627,8 @@
                     //log("DIV:" + "#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos + " " + npcArray[i].icon);
 
 
-                    // TODO: attach an onclick event for special object.  i.e.  if( npcArray[i].modalID != null) 
-                    if (npcArray[i].icon == "monster-mount1")
+                    // TODO: attach an onclick event for special object.  i.e.  if( npcArray[i].modalID != null)  add in Monster servers side attribute
+                    if (npcArray[i].icon == "monster-mount1" || npcArray[i].icon == "monster-crow1")
                     {
                         
                         $("#P-" + npcArray[i].xPos + "-" + npcArray[i].yPos).attr("icon", npcArray[i].icon);

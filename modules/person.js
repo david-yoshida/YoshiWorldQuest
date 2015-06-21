@@ -16,8 +16,7 @@ var Person = function (firstName, icon) {
     this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
     this.icon = icon;
-    this.isMonster = false;
-    this.face = 'fE'; // S - South by default
+    this.face = 'fE'; // fE - Facing east
     this.tickCount = 0;
     this.xPos;
     this.yPos;
@@ -25,6 +24,16 @@ var Person = function (firstName, icon) {
     this.ySectionStart; 
     this.createdDate = Date.now();
     this.currentGameboard;
+    this.mode = 'Normal'  // Normal   TODO: Attack (1/4 speed), QUIET MODE (1/8 SPEED), FLEE MODE (+25% speed) , Rest (0 speed)
+    this.movementRate = 150;  // 150 - standard  100 - Fast
+    
+    // below used more for NPC/Monster behaviour
+    this.isMonster = false;
+    this.xp;
+    this.hp;
+    this.level;
+    this.ai = 'none';
+
     
     console.log('Person instantiated. ' + GLOBAL.personArray.push(this) + ' people.');  // Add to the global personArray;
 };
