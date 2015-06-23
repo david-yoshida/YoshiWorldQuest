@@ -10,138 +10,192 @@ var Person = function (firstName, icon) {
     personIDcounter     = GLOBAL.personIDcounter
     MAP_SECTION_SIZE_X  = GLOBAL.GLOBAL_SECTION_SIZE_X;
     MAP_SECTION_SIZE_Y  = GLOBAL.GLOBAL_SECTION_SIZE_Y;
-    io                  = GLOBAL.io;
+    io = GLOBAL.io;
+    personArray = GLOBAL.personArray;
 
     this.id = this.getNextid();
     this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
     this.icon = icon;
     this.face = 'fE'; // fE - Facing east
-    this.tickCount = 0;
+    this.stepCount = 0; // how many keystrokes made by player.
     this.xPos;
     this.yPos;
     this.xSectionStart;
     this.ySectionStart; 
     this.createdDate = Date.now();
     this.currentGameboard;
-    this.mode = 'Normal'  // Normal   TODO: Attack (1/4 speed), QUIET MODE (1/8 SPEED), FLEE MODE (+25% speed) , Rest (0 speed)
-    this.movementRate = 150;  // 150 - standard  100 - Fast
+    this.xp = 0;
+    this.mode = 'normal'  // normal   attack (1/4 speed), quiet (1/8 SPEED), flee (+25% speed) , Rest (0 speed)
+    this.baseMovementRate = 170;  // 170 - standard  100 - Fast
+    this.movementRate = 170;  // 170 - standard  100 - Fast
+    this.tickCounter = Date.now();
     
     // below used more for NPC/Monster behaviour
     this.isMonster = false;
-    this.xp;
-    this.hp;
+    this.xpValue;
+    this.hp = 10;
     this.level;
     this.ai = 'none';
 
+    // below used more for Item behaviour
+    this.isItem = false;
+
     
-    console.log('Person instantiated. ' + GLOBAL.personArray.push(this) + ' people.');  // Add to the global personArray;
+    console.log('Person instantiated. ' + personArray.push(this) + ' people.');  // Add to the global personArray;
 };
 
 Person.prototype.movement = function (action) {
 
-    //TODO:  Limit movement server side too, it will help limit monster speed
 
-    var xPos = this.xPos; // assign global to local variable
-    var yPos = this.yPos; // assign global to local variable
-    var face = this.face;
+    // Check if proper time has passed since last movement
+    if (Date.now() - this.tickCounter > this.movementRate) { 
 
-    switch (action) {
-        case "up":
-            xPos--;
-            face = 'fN';
-            break;
-        case "down":
-            xPos++;
-            face = 'fS';
-            break;
-        case "left":
-            yPos--;
-            face = 'fW';          
-            break;
-        case "right":
-            yPos++;
-            face = 'fE';
-            break;
-        default:
-    }
+        // Assign global variables to local variable before a final move has been determined
+        var xPos = this.xPos;
+        var yPos = this.yPos;
+        var face = this.face;
 
-    if (false) {   // World wrap
-        if (xPos < 0) xPos = this.currentGameboard.maxRow;
-        if (xPos > this.currentGameboard.maxRow) xPos = 0;
-        if (yPos < 0) yPos = this.currentGameboard.maxCol;
-        if (yPos > this.currentGameboard.maxCol) yPos = 0;
+        switch (action) {
+            case "up":
+                xPos--;
+                face = 'fN';
+                break;
+            case "down":
+                xPos++;
+                face = 'fS';
+                break;
+            case "left":
+                yPos--;
+                face = 'fW';
+                break;
+            case "right":
+                yPos++;
+                face = 'fE';
+                break;
+            default:
+        }
 
-    } else { // no world wrap
-        if (xPos < 0) xPos = 0;
-        if (xPos > this.currentGameboard.maxRow) xPos = this.currentGameboard.maxRow;
-        if (yPos < 1) yPos = 0;
-        if (yPos > this.currentGameboard.maxCol) yPos = this.currentGameboard.maxCol;
-    }
+        if (false) {   // World wrap
+            if (xPos < 0) xPos = this.currentGameboard.maxRow;
+            if (xPos > this.currentGameboard.maxRow) xPos = 0;
+            if (yPos < 0) yPos = this.currentGameboard.maxCol;
+            if (yPos > this.currentGameboard.maxCol) yPos = 0;
 
-    
-    if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {  // BLOCKED SOMETHING THERE!
-        
-        console.log("Blocked:Something here!");
-        
-        // Kill the bannana, as long as you are not the bananna
-        if (this.icon != "monster-banana" && this.currentGameboard.gameBoardArray[xPos][yPos].icon == "monster-banana") {
-            
-            console.log(this.firstName + " ate the Bannana!");
-            
-            var monster1 = this.currentGameboard.gameBoardArray[xPos][yPos]; // grab the monster
-            
-            var strEmit = '{ "id": ' + monster1.id + 
-                ',"firstName": "' + monster1.firstName + 
-                '","icon": "' + monster1.icon + 
-                '", "xPos": ' + monster1.xPos + 
-                ', "yPos": ' + monster1.yPos + 
-                ' }';
-            
-            io.sockets.emit('remove person', strEmit);                  // broadcast remove person
-            delete GLOBAL.personArray[monster1.id];                            // delete from person array, but keep stucture. TO DO:  issue person array keeps growing, never get's smaller
-            delete this.currentGameboard.gameBoardArray[xPos][yPos];    // delete from game board
+        } else { // no world wrap
+            if (xPos < 0) xPos = 0;
+            if (xPos > this.currentGameboard.maxRow) xPos = this.currentGameboard.maxRow;
+            if (yPos < 1) yPos = 0;
+            if (yPos > this.currentGameboard.maxCol) yPos = this.currentGameboard.maxCol;
         }
 
 
-        // Check for anything special like a teleport
-        this.currentGameboard.checkSpecialAction(this, xPos, yPos);
 
 
-    } else {
 
-        delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];  // remove person from old position
+        if (this.currentGameboard.gameBoardArray[xPos][yPos] != null) {  // BLOCKED SOMETHING THERE!
 
-        this.xPos = xPos; // assign to new position
-        this.yPos = yPos; // assign to new position
-        this.face = face;
-        this.refreshSection();// Refresh the section co-ordinates person is in now
-    
-        this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
-    }
-    
-    
-    // TELEPORT CODE
-    if (false) {
-        if (this.xPos == 3 && this.yPos == 0 && this.currentGameboard.hashtag == '#homestead') {
-        
-            delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];
-            gameboard2.addPersonFixed(this, 2,2); // try to jump person to a fixed position first
+            console.log("Blocked:Something here!");
 
-            console.log('Jump Point here!: ' + ''); // xxx
+            // Attempt attack if person is in attack mode and blocked space is a monster
+            if (this.mode == "attack" & this.currentGameboard.gameBoardArray[xPos][yPos].isMonster) {
 
+                monster1 = this.currentGameboard.gameBoardArray[xPos][yPos];
+                console.log("ATTEMPT ATTACK! " + this.firstName + " strikes at " + monster1.firstName + "!!");
+
+                /*
+                *  Attacker 1d6 roll - 5 or 6 hits  
+                *
+                *  Defender 1d6 roll - 4,5,6 blocks
+                */
+                if (true) {// hit! 1d4
+
+                    daggerDamage = Math.floor((Math.random() * 4) + 1);  // 1d4
+                    monster1.hp = monster1.hp - daggerDamage;
+
+                    console.log("SUCCESSFUL HIT! " + daggerDamage + " hp damage! " + monster1.hp + "hp remaining!");
+
+                    // Check if kill took place
+                    if (monster1.hp <= 0) {
+
+                        var strEmit = '{ "id": ' + monster1.id +
+                            ',"firstName": "' + monster1.firstName +
+                            '","icon": "' + monster1.icon +
+                            '", "xPos": ' + monster1.xPos +
+                            ', "yPos": ' + monster1.yPos +
+                            ' }';
+
+                        io.sockets.emit('remove person', strEmit);                  // broadcast remove person
+
+
+                        //delete GLOBAL.personArray[monster1.id];       // does not work as the monster1.id is the same as array length. Referring to memory location should be faster than searching through id.,  perhaps a garbage collector type of program needs to be run.
+                        personArray[monster1.id].isMonster = false;     // delete from person array, but keep stucture. TO DO:  issue person array keeps growing, never get's smaller
+
+                        // Collect XP
+                        this.xp = this.xp + personArray[monster1.id].xpValue;
+                        console.log("XP Awarded! " + personArray[monster1.id].xpValue + ", total player xp is:" + this.xp);
+
+                        delete this.currentGameboard.gameBoardArray[xPos][yPos];    // delete from game board
+                    }
+
+
+                }
+
+            }
+
+
+            // Check for anything special like a teleport
+            this.currentGameboard.checkSpecialAction(this, xPos, yPos); //Check special action like teleport
+
+
+        } else {
+
+            delete this.currentGameboard.gameBoardArray[this.xPos][this.yPos];  // remove person from old position
+
+            this.xPos = xPos; // assign to new position
+            this.yPos = yPos; // assign to new position
+            this.face = face;
+            this.refreshSection();// Refresh the section co-ordinates person is in now
+
+            this.currentGameboard.gameBoardArray[this.xPos][this.yPos] = this;  // add person to new position
+
+            this.tickCounter = Date.now(); // timestamp of move
         }
+
+
+        this.emitMovement(); // Send movement to all players
+
+
     }
-
-
 
     console.log('Move: ' + this.firstName + ' (' + this.xPos + '-' + this.yPos + ')');
-    console.log('Tick: ' + this.tickCount);
+    console.log('step: ' + this.stepCount);
     
-    this.tickCount++;
-    this.emitMovement(); // Send movement to all players
+    this.stepCount++;
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Current direction base on face
 Person.prototype.getCurrentDirection = function () {
@@ -206,9 +260,7 @@ Person.prototype.emitMovement = function () {
 
 Person.prototype.parseLocationToJSON = function () {
     
-    
     // TODO: make string smaller by using smaller field names.
-
     var str = '{ "id": ' + this.id + 
                 ', "firstName": "' + this.firstName + 
                 '", "icon": "' + this.icon + 
@@ -217,8 +269,9 @@ Person.prototype.parseLocationToJSON = function () {
                 '", "xPos": ' + this.xPos + 
                 ', "yPos": ' + this.yPos + 
                 ', "xGBSector": ' + this.xSectionStart + 
-                ', "yGBSector": ' + this.ySectionStart + 
-                ' }';  // i.e. var str = '{ "name": "John Doe", "age": 42 }';
+                ', "yGBSector": ' + this.ySectionStart +
+                ', "movementRate": ' + this.movementRate +
+                ' }';
 
     return str;
 }
@@ -232,5 +285,27 @@ Person.prototype.setAsMonster = function () {
     // this.intelligence level 0-10
 }
 
+// Set as a monster
+Person.prototype.setAsItem = function () {
+
+    this.isItem = true;
+}
+
 
 module.exports = Person;
+
+
+
+
+
+//  Check if person ID exists in the array - TODO:  Not used on server side, find a better place to keep it.
+function findInArray(myArray, id) {  // id - Check if this Id exists in the person Array, if not return a -1;  Used more on the client side
+
+    var personExists = -1;
+
+    for (i = 0; i < myArray.length; i++) {
+        if (myArray[i].id == id) personExists = i; // found id!
+    }
+
+    return personExists;
+}

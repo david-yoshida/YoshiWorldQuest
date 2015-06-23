@@ -38,8 +38,10 @@ GameClock.prototype.helloWorld = function (person) {
 
 GameClock.prototype.moveMonsters = function (personArray) {
     
-    console.log("Move Monsters!");
-    console.log("Monster Array Length: " + personArray.length);
+    console.log("Move Monsters - start");
+    console.log("Move Monsters - Person Array Length: " + personArray.length);
+    
+    monsterCounter = 0;
 
     // TODO: use a monster array for each gameboard to improve performance, and only move if there is a character on the same grid.
 
@@ -47,8 +49,6 @@ GameClock.prototype.moveMonsters = function (personArray) {
 
     for (i = 0; i < personArray.length; i++) {
         if(personArray[i].isMonster && personArray[i].ai == 'wandering') {
-            console.log("Found Monster!" + personArray[i].firstName);
-           
 
             person = personArray[i];
             x = Math.floor((Math.random() * 20) + 1); 
@@ -71,13 +71,14 @@ GameClock.prototype.moveMonsters = function (personArray) {
             }
 
             person.movement(str);
+            monsterCounter++;
 
-            console.log("Move Monster!" + str + " rnd" + x);
+            //console.log("Move Monster!" + str + " rnd" + x);
 
         }
     }
     
-
+    console.log("Move Monsters - processed " + monsterCounter);
 };
 
 module.exports = GameClock;

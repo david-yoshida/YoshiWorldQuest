@@ -18,8 +18,8 @@ MonsterManual.prototype.createKnight = function () {
     
     myMonster = new Person('Knight', 'monster-mount1');
     myMonster.setAsMonster();
-    myMonster.xp = 1;
-    myMonster.hp = 1;
+    myMonster.xpValue = 1;
+    myMonster.hp = 10;
     myMonster.level = 2;
     myMonster.ai = 'wandering';
     
@@ -31,7 +31,7 @@ MonsterManual.prototype.createCrow = function () {
     
     myMonster = new Person('caw caw...', 'monster-crow1');
     myMonster.setAsMonster();
-    myMonster.xp = 0.1;
+    myMonster.xpValue = 0.1;
     myMonster.hp = 1;
     myMonster.level = 0;
     myMonster.ai = 'none';

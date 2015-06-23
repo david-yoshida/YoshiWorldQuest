@@ -34,9 +34,18 @@
 
         <div class="row well">
             <div class="col-md-3 personName" id="personName" contenteditable>Naomi Yoshida</div>
-            <div class="col-md-6"> Players <span class="badge">4</span></div>
+            <div class="col-md-6"> 
+
+                <div class="btn-group" role="group" aria-label="...">
+                    <button id="person-mode-normal" class="btn btn-primary person-mode active" type="submit"><span class="glyphicon glyphicon-picture" aria-hidden="true"></span> ADVENTURE</button>
+                    <button id="person-mode-attack" class="btn btn-primary person-mode" type="submit"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span> ATTACK</button>
+                    <button id="person-mode-quiet" class="btn btn-primary person-mode" type="submit"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> QUIET</button>
+                    <button id="person-mode-flee" class="btn btn-primary person-mode" type="submit"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span> FLEE</button>
+                    <button id="person-mode-rest" class="btn btn-primary person-mode" type="submit"><span class="glyphicon glyphicon-tent" aria-hidden="true"></span> REST</button>
+                </div>
+            </div>
             <div class="col-md-3">
-                
+                Player count <span class="badge">4</span>
             </div>
 
 
@@ -47,7 +56,7 @@
             <div class="col-md-9">
                 <strong>Game Board </strong><span id="gb-section-long-lat"></span>
                 <table id="gameBoard">
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -61,7 +70,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -75,7 +84,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -89,7 +98,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -103,7 +112,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -117,7 +126,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -131,7 +140,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -145,7 +154,7 @@
                         <td><div></div></td>
                         <td><div></div></td>
                     </tr>
-                    <tr>
+                    <tr class="gb-row">
                         <td><div></div></td>
                         <td><div></div></td>
                         <td><div></div></td>
@@ -256,7 +265,7 @@
         icon = "naomi";
         personID = -1;
         gbName = "nil";
-        movementRate = 150;
+        movementRate = 170;
         tickCounter = 0;
 
 
@@ -389,22 +398,31 @@
 
             });
 
-            
-
-
-            /*
-            TODO: Launch Modal on items.  Using AJAX .load
-            $("td").click(function () {
-                //alert("The td was clicked.");
-                alert(this.id);
+            // Change person mode buttons
+            $("#person-mode-normal").click(function () {
+                personModeChange('normal');
             });
-            */
+
+            $("#person-mode-attack").click(function () {
+                personModeChange('attack');
+            });
+           
+            $("#person-mode-quiet").click(function () {
+                personModeChange('quiet');
+            });
+
+            $("#person-mode-flee").click(function () {
+                personModeChange('flee');
+            });
+
+            $("#person-mode-rest").click(function () {
+                personModeChange('rest');
+            });
 
 
-
-            initGameBoard();  // add div #ids to cell
-            initController(); // bind arrow keys
-            initStartPosition(); // alert("#" + xPos + "-" + yPos);
+            initGameBoard();        // add div #ids to cell
+            initController();       // bind arrow keys
+            initStartPosition();    // alert("#" + xPos + "-" + yPos);
 
 
             draw();         // first draw people
@@ -432,7 +450,7 @@
 
             log("GAMEBOARD:" + gbName);
 
-            $("tr").each(function () {
+            $(".gb-row").each(function () {
 
                 $.each(this.cells, function () {
                     $(this).attr("id", xCount + "-" + yCount); // TD
@@ -454,8 +472,8 @@
                 yCount = yGBSector;
             });
 
-            xMax = $("tr").size();      // set number of rows
-            yMax = $("tr:first").children('td').size(); // set number of columns
+            xMax = $(".gb-row").size();      // set number of rows
+            yMax = $(".gb-row:first").children('td').size(); // set number of columns
 
         }
 
@@ -508,7 +526,7 @@
 
         //MOVE - DRAW LOCAL AND SEND DATA TO SERVER
         function movement(action) {
-
+            
             if (Date.now() - tickCounter > movementRate) { // movement rate check
 
                 // Local Draw
@@ -552,6 +570,7 @@
                             icon = json.icon;
                             xPos = json.xPos;  // overwrite from server
                             yPos = json.yPos;  // overwrite from server
+                            movementRate = json.movementRate;
 
                             detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
 
@@ -565,7 +584,7 @@
                     });
 
 
-                    log("client:" + xPos + "-" + yPos);
+                    log("client:" + xPos + "-" + yPos + " m:"+ movementRate);
                 }
 
                 tickCounter = Date.now();
@@ -591,7 +610,7 @@
 
         // The main draw routine
         function draw() {
-
+            /*
             $("td div").removeClass("mia");
             $("td div").removeClass("naomi");
             $("td div").removeClass("monster-banana");
@@ -605,13 +624,12 @@
             $("td div").removeClass("fE");
             $("td div").removeClass("fS");
             $("td div").removeClass("fW");
+            */
 
-
-            //$("td div").removeClass();
+            // clean up old table cell div classes, titles and click events
+            $(".gb-row td div").attr("class", "personHolder");
             $("td div").attr("title", "");
-
-            $("td div").off("click");  // remove all onclick events
-
+            $("td div").off("click");
 
             // Draw the other players, including self
             for (i = 0; i < npcArray.length; i++)
@@ -693,6 +711,43 @@
         // Send to gameboard Log
         function resetLog(logString) {
             $("#gameBoardLog").html("");
+        }
+
+        // Change the persion mode - Adventure, Attack, etc.
+        function personModeChange(modeName) {
+            $("person-mode").removeClass("active");
+            // Server call to change mode once personID has been obtained
+            if (personID > 0) {
+
+                $.ajax({
+                    type: "POST",
+                    url: '/mode',
+                    data: { mode: modeName, personID: personID, },
+                    timeout: 100,
+                    async: true,
+                    dataType: 'text',   //you may use jsonp for cross origin request
+                    crossDomain: true,
+                    success: function (data, status) {
+
+                        log("mode-json:" + data);
+                        var json = JSON.parse(data);
+
+                        personMode = json.mode;
+                        movementRate = json.movementRate;
+
+                        tickCounter = Date.now() + movementRate; // reset tick counter
+
+                        $(".person-mode").removeClass("active");
+                        $("#person-mode-" + modeName).addClass("active");
+                    },
+                    error: function () {
+
+                    }
+                });
+
+                
+            }   
+
         }
 
 
