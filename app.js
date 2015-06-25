@@ -88,12 +88,14 @@ app.post('/move', function (req, res) {
 app.post('/newGame', function (req, res) {
     
     var person1 = new Person(req.body.name, req.body.icon); // get name from post
-    
+    person1.isPlayer = true;
+
     gameboard1.addPerson(person1);  // Add new person to the game boards
+    gameboard1.refreshPlayerCount();
+
     //person1.emitMovement();         // Emit new person to all users
     
     gameboard1.broadcastRefresh(); // TO DO: EMIT TO ONLY THE NEW GAME PLAYER
-    gameboard1.broadcastAI();
     
     // TODO: re-assess some stuff when new player arrives
     // TODO: add people to different game boards.

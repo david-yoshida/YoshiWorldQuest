@@ -70,7 +70,7 @@ GameClock.prototype.moveMonsters = function (personArray) {
                     str = person.getCurrentDirection();
             }
 
-            person.movement(str);
+            person.movement(str);  //TODO:  need to improve performance.  10 monster moves will call each browser 10 times.
             monsterCounter++;
 
             //console.log("Move Monster!" + str + " rnd" + x);

@@ -10,7 +10,8 @@
     
     this.hashtag    = hashtag;
     this.maxRow     = row - 1;
-    this.maxCol = col - 1;    
+    this.maxCol = col - 1;
+    this.playerCount = 0; // updated periodically
     
     // Create gameboard array
     this.gameBoardArray = new Array(row)
@@ -87,20 +88,6 @@ Gameboard.prototype.broadcastRefresh = function (person) {
 };
 
 
-Gameboard.prototype.broadcastAI = function (person) {
-    
-    // Call redraw for the whole gameboard
-    for (i = 0; i < personArray.length; i++) {
-        
-        // only move monstor
-        if (personArray[i] != null && personArray[i].icon == 'monster-banana') {
-            personArray[i].movement('down'); // skip blank
-        }
-
-    }
-};
-
-
 // create teleport jump points on this gameboard
 Gameboard.prototype.addTeleportPoint = function (gb_hashtag, icon, xPos, yPos, to_xPos, to_yPos) {
     
@@ -134,6 +121,22 @@ Gameboard.prototype.checkSpecialAction = function (person, xPos, yPos) {
 
     }
 
+
+};
+
+// Refresh player count on demand to help performance
+Gameboard.prototype.refreshPlayerCount = function () {
+    
+    var tempPlayerCount = 0;
+
+    // Count players on this gameboard
+    for (i = 0; i < personArray.length; i++) {
+        
+        if (personArray[i].isPlayer)
+                tempPlayerCount++;
+    }
+
+    this.playerCount = tempPlayerCount;
 
 };
 

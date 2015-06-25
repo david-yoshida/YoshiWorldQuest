@@ -45,7 +45,9 @@
                 </div>
             </div>
             <div class="col-md-3">
-                Player count <span class="badge">4</span>
+                Hit Points <span id="person-hp" class="badge">10</span>
+                XP <span id="person-xp" class="badge">0</span>
+                Players <span id="person-gb-count" class="badge">0</span>
             </div>
 
 
@@ -262,6 +264,9 @@
 
         npcArray = new Array(0);
 
+        hp = 0;
+        xp = 0;
+        playerGBCount = 0;
         icon = "naomi";
         personID = -1;
         gbName = "nil";
@@ -281,7 +286,8 @@
                 
             // Listen for server messages.
             socket.on('new movement', function (data) {
-                //log('<strong>SERVER:' + data + '</strong>');
+                //  DEBUG MOVEMENT PERFORMANCE : log('<strong>SERVER:' + data + '</strong>');
+                var personChangeDetected = false;
                 var json = JSON.parse(data);
 
                 var index = findInArray(npcArray, json.id);
@@ -290,28 +296,41 @@
 
                     if (json.face == 'fN' || json.face == 'fS') json.face = npcArray[index].face;  // Leave the last facing direction on N and S movement
                     //if (json.face == 'fN') json.face = npcArray[index].face;  // Leave the last facing direction on N and S movement
+
+                    if (npcArray[index].xPos != json.xPos || npcArray[index].yPos != json.yPos || npcArray[index].icon != json.icon) {
+                        personChangeDetected = true;  // This person's position or icon changed from what we have in our array, so draw!
+                    }
+
                     npcArray[index] = json;
+                    // KEEP TO TROUBLESHOOT PERFORMANCE - alert(npcArray[index].pGBCount + '-' + data);
                 }
                 else
+                {
                     npcArray.push(json);
+                    personChangeDetected = true;
+                }
+                    
                 
                 // Only draw person on the same gameboard section as you to save performance
-                if (json.xGBSector == xGBSector && json.yGBSector == yGBSector)
+                if (json.xGBSector == xGBSector && json.yGBSector == yGBSector && personChangeDetected)
                     draw();
 
             })
 
             socket.on('remove person', function (data) {
 
+                //log('<strong>' + data + '</strong>');
+
                 var json = JSON.parse(data);
-                log('<strong>' + data + '</strong>');
+
+                log('<strong>' + json.firstName + '</strong>' + ' has left the game.');
 
                 var index = findInArray(npcArray, json.id);
                 npcArray.splice(index, 1);
                 draw();  // Call the draw
 
                 if (personID == json.id) {
-                    alert('game over!');
+                    alert('game over!');  // TODO: Game over change to modal
                     personID = -1;
 
                 }
@@ -448,8 +467,6 @@
             xCount = xGBSector;
             yCount = yGBSector;
 
-            log("GAMEBOARD:" + gbName);
-
             $(".gb-row").each(function () {
 
                 $.each(this.cells, function () {
@@ -564,12 +581,11 @@
                         crossDomain: true,
                         success: function (data, status) {
 
-                            //log("Move-json:" + data);
                             var json = JSON.parse(data);
 
                             icon = json.icon;
-                            xPos = json.xPos;  // overwrite from server
-                            yPos = json.yPos;  // overwrite from server
+                            xPos = json.xPos;  // take from server
+                            yPos = json.yPos;  // take from server
                             movementRate = json.movementRate;
 
                             detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
@@ -584,7 +600,7 @@
                     });
 
 
-                    log("client:" + xPos + "-" + yPos + " m:"+ movementRate);
+                    //log("client:" + xPos + "-" + yPos + " m:"+ movementRate); // DEBUG person movement
                 }
 
                 tickCounter = Date.now();
@@ -593,9 +609,11 @@
 
         
         // Jump to new gameboard if found in new position
-        function detectGameboardSectionJump(hashtag, x,y) {
+        function detectGameboardSectionJump(hashtag, x, y) {
 
             if (gbName != hashtag || x != xGBSector || y != yGBSector) {
+
+                if (gbName != hashtag) log("Welcome to Gameboard :" + hashtag);
 
                     gbName = hashtag;
                     xGBSector = x;
@@ -664,6 +682,16 @@
                     }
 
                 }
+
+                // Found self in npcArray! The array push can take place out of order.  So personID does not match array ID [i]
+                if (personID > 0 && npcArray[i].id == personID) {
+                    //alert('update!' + npcArray[i].pGBCount);
+                    $("#person-hp").text(npcArray[i].pHP);
+                    $("#person-xp").text(npcArray[i].pXP);
+                    //$("#person-gb-count").text(npcArray[i].pGBCount);
+                    $("#person-gb-count").text(npcArray[i].pGBCount);
+                }
+
             } // end for
 
         }
@@ -715,9 +743,10 @@
 
         // Change the persion mode - Adventure, Attack, etc.
         function personModeChange(modeName) {
+
             $("person-mode").removeClass("active");
-            // Server call to change mode once personID has been obtained
-            if (personID > 0) {
+           
+            if (personID > 0) { // Server call to change mode once personID has been obtained
 
                 $.ajax({
                     type: "POST",
@@ -729,16 +758,16 @@
                     crossDomain: true,
                     success: function (data, status) {
 
-                        log("mode-json:" + data);
                         var json = JSON.parse(data);
 
                         personMode = json.mode;
                         movementRate = json.movementRate;
-
                         tickCounter = Date.now() + movementRate; // reset tick counter
 
                         $(".person-mode").removeClass("active");
                         $("#person-mode-" + modeName).addClass("active");
+
+                        //log("mode-json:" + data);  // DEBUG: changing person modes
                     },
                     error: function () {
 

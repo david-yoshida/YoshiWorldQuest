@@ -25,16 +25,17 @@ var Person = function (firstName, icon) {
     this.ySectionStart; 
     this.createdDate = Date.now();
     this.currentGameboard;
+    this.hp = 10;
     this.xp = 0;
     this.mode = 'normal'  // normal   attack (1/4 speed), quiet (1/8 SPEED), flee (+25% speed) , Rest (0 speed)
     this.baseMovementRate = 170;  // 170 - standard  100 - Fast
     this.movementRate = 170;  // 170 - standard  100 - Fast
     this.tickCounter = Date.now();
+    this.isPlayer = false;
     
     // below used more for NPC/Monster behaviour
     this.isMonster = false;
     this.xpValue;
-    this.hp = 10;
     this.level;
     this.ai = 'none';
 
@@ -132,6 +133,8 @@ Person.prototype.movement = function (action) {
                         personArray[monster1.id].isMonster = false;     // delete from person array, but keep stucture. TO DO:  issue person array keeps growing, never get's smaller
 
                         // Collect XP
+                        console.log("Monster XP is! " + personArray[monster1.id].xpValue);
+
                         this.xp = this.xp + personArray[monster1.id].xpValue;
                         console.log("XP Awarded! " + personArray[monster1.id].xpValue + ", total player xp is:" + this.xp);
 
@@ -163,7 +166,7 @@ Person.prototype.movement = function (action) {
         }
 
 
-        this.emitMovement(); // Send movement to all players
+        this.emitMovement(); // Send movement to all players, perhaps only send to particular gameboard section.  TODO:  Monster AI movements will send message to all browsers.
 
 
     }
@@ -271,6 +274,9 @@ Person.prototype.parseLocationToJSON = function () {
                 ', "xGBSector": ' + this.xSectionStart + 
                 ', "yGBSector": ' + this.ySectionStart +
                 ', "movementRate": ' + this.movementRate +
+                ', "pHP": ' + this.hp +
+                ', "pXP": ' + this.xp +
+                ', "pGBCount": ' + this.currentGameboard.playerCount +
                 ' }';
 
     return str;
