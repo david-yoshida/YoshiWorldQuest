@@ -272,6 +272,7 @@
         gbName = "nil";
         movementRate = 170;
         tickCounter = 0;
+        gsInstance = 0;
 
 
         // Start the fun!
@@ -286,7 +287,7 @@
                 
             // Listen for server messages.
             socket.on('new movement', function (data) {
-                //  DEBUG MOVEMENT PERFORMANCE : log('<strong>SERVER:' + data + '</strong>');
+                log('<strong>SERVER:' + data + '</strong>'); //DEBUG MOVEMENT PERFORMANCE : 
                 var personChangeDetected = false;
                 var json = JSON.parse(data);
 
@@ -313,7 +314,11 @@
                 
                 // Only draw person on the same gameboard section as you to save performance
                 if (json.xGBSector == xGBSector && json.yGBSector == yGBSector && personChangeDetected)
-                    draw();
+
+                  if (!json.isObject) { // Only draw moving items
+                        draw();
+                 }
+                           
 
             })
 
@@ -330,8 +335,7 @@
                 draw();  // Call the draw
 
                 if (personID == json.id) {
-                    alert('game over!');  // TODO: Game over change to modal
-                    personID = -1;
+                    gameOverRoutine('dead');
 
                 }
             })
@@ -404,6 +408,7 @@
                         personID = json.id;
                         xPos = json.xPos;  // overwrite from server
                         yPos = json.yPos;  // overwrite from server
+                        gsInstance = json.gsInstance;
 
                         detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
 
@@ -574,7 +579,7 @@
                     $.ajax({
                         type: "POST",
                         url: '/move',
-                        data: { direction: action, personID: personID, icon: icon },
+                        data: { direction: action, personID: personID, icon: icon, gsInstance: gsInstance },
                         timeout: 100,
                         async: true,
                         dataType: 'text',   //you may use jsonp for cross origin request
@@ -583,14 +588,23 @@
 
                             var json = JSON.parse(data);
 
-                            icon = json.icon;
-                            xPos = json.xPos;  // take from server
-                            yPos = json.yPos;  // take from server
-                            movementRate = json.movementRate;
 
-                            detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
+                            if (gsInstance == json.gsInstance) // game server reset detected!
+                            {
+                                icon = json.icon;
+                                xPos = json.xPos;  // take from server
+                                yPos = json.yPos;  // take from server
+                                movementRate = json.movementRate;
 
-                            $("#gb-section-long-lat").html('(' + json.xGBSector / +GLOBAL_SECTION_SIZE_X + ',' + json.yGBSector / GLOBAL_SECTION_SIZE_Y + ')') // update gameboard long/lat
+                                detectGameboardSectionJump(json.gbName, json.xGBSector, json.yGBSector);  // Check GB section jump
+
+                                // update gameboard long/lat label
+                                $("#gb-section-long-lat").html('(' + json.xGBSector / +GLOBAL_SECTION_SIZE_X + ',' + json.yGBSector / GLOBAL_SECTION_SIZE_Y + ')') 
+                            }
+                            else
+                            {
+                                gameOverRoutine('server-reset');
+                            }
 
                             //draw();  //No need to draw, as this is handled by the server EMIT 'new message'
                         },
@@ -628,6 +642,9 @@
 
         // The main draw routine
         function draw() {
+
+            //alert('draw called!');
+
             /*
             $("td div").removeClass("mia");
             $("td div").removeClass("naomi");
@@ -730,6 +747,19 @@
         }
 
 
+        function gameOverRoutine(actionText) {
+            personID = -1;
+            npcArray = [];
+
+            // reset game
+            initGameBoard();// add div #ids, and texture
+            //initController(); 
+            initStartPosition();
+            
+            modal(actionText);
+
+            //alert('game over!');  // TODO: Game over change to modal
+        }
 
         // Send to gameboard Log
         function log(logString) {

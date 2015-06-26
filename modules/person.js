@@ -12,7 +12,8 @@ var Person = function (firstName, icon) {
     MAP_SECTION_SIZE_Y  = GLOBAL.GLOBAL_SECTION_SIZE_Y;
     io = GLOBAL.io;
     personArray = GLOBAL.personArray;
-
+    
+    this.gameServerInstanceGUID = GLOBAL.gameServerInstanceGUID;
     this.id = this.getNextid();
     this.salt = this.generateSalt(); // use this for a simple sessionID check
     this.firstName = firstName;
@@ -32,6 +33,7 @@ var Person = function (firstName, icon) {
     this.movementRate = 170;  // 170 - standard  100 - Fast
     this.tickCounter = Date.now();
     this.isPlayer = false;
+
     
     // below used more for NPC/Monster behaviour
     this.isMonster = false;
@@ -101,7 +103,7 @@ Person.prototype.movement = function (action) {
             // Attempt attack if person is in attack mode and blocked space is a monster
             if (this.mode == "attack" & this.currentGameboard.gameBoardArray[xPos][yPos].isMonster) {
 
-                monster1 = this.currentGameboard.gameBoardArray[xPos][yPos];
+                var monster1 = this.currentGameboard.gameBoardArray[xPos][yPos];
                 console.log("ATTEMPT ATTACK! " + this.firstName + " strikes at " + monster1.firstName + "!!");
 
                 /*
@@ -115,6 +117,22 @@ Person.prototype.movement = function (action) {
                     monster1.hp = monster1.hp - daggerDamage;
 
                     console.log("SUCCESSFUL HIT! " + daggerDamage + " hp damage! " + monster1.hp + "hp remaining!");
+                    
+                    
+                    // animate the hit
+                    /*
+                    var tempIcon = monster1.icon;
+                    
+                    monster1.icon = "monster-zombie1";
+                    monster1.emitMovement();
+                    
+                    setTimeout(function () {
+                        monster1.icon = tempIcon;
+                        monster1.emitMovement();
+                    }, 500);
+
+                 */
+
 
                     // Check if kill took place
                     if (monster1.hp <= 0) {
@@ -263,6 +281,13 @@ Person.prototype.emitMovement = function () {
 
 Person.prototype.parseLocationToJSON = function () {
     
+    var isObject = true;
+    
+    if (this.isPlayer || this.isMonster) {
+        isObject = false;
+    }
+
+    
     // TODO: make string smaller by using smaller field names.
     var str = '{ "id": ' + this.id + 
                 ', "firstName": "' + this.firstName + 
@@ -277,6 +302,8 @@ Person.prototype.parseLocationToJSON = function () {
                 ', "pHP": ' + this.hp +
                 ', "pXP": ' + this.xp +
                 ', "pGBCount": ' + this.currentGameboard.playerCount +
+                ', "gsInstance": ' + this.gameServerInstanceGUID +
+                ', "isFixedObject": ' + isObject +
                 ' }';
 
     return str;

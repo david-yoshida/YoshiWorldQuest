@@ -65,22 +65,31 @@ app.post('/move', function (req, res) {
     var theDirection    = req.body.direction;
     var personID        = req.body.personID;
     var icon            = req.body.icon;
+    var tempGUID        = req.body.gsInstance
     var str;
     
 
-    personArray[personID].icon = icon;                         // TO DO: allow change of clothes or appearance when equipment is used
-    personArray[personID].movement(theDirection);              // TO DO : Cleann up the use the GLOBAL in the classes, find a pattern for this on google search
+    // Be sure game reset did not happen
+    if (gameServerInstanceGUID == tempGUID)
+    {
+        personArray[personID].icon = icon;                         // TO DO: allow change of clothes or appearance when equipment is used
+        personArray[personID].movement(theDirection);              // TO DO : Cleann up the use the GLOBAL in the classes, find a pattern for this on google search
+        str = personArray[personID].parseLocationToJSON();
 
-    str = personArray[personID].parseLocationToJSON();
-    
+    }
+    else { // detect game reset, send back the current game server instance to browser
+        str = '{ "gsInstance": ' + this.gameServerInstanceGUID + ' }';
+    }
+        
     // Write to browser
     res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
     res.end(str);
     
     // After each movement call the gameTick() to advance various server side game elements derrived from turn based gaming
-    gameTick();
+    if (gameServerInstanceGUID == tempGUID)
+        gameTick();
 
-    //console.log('firstName: ' + personArray[personID].firstName + ' ID: ' + personID + ' str: ' + str);
+    // DEBUG : console.log('firstName: ' + personArray[personID].firstName + ' ID: ' + personID + ' str: ' + str);
 
 });
 
@@ -311,7 +320,10 @@ GLOBAL.personIDcounter = 0;
 GLOBAL.gameboardArray = new Array(0);
 
 GLOBAL.GLOBAL_SECTION_SIZE_X        = 8;
-GLOBAL.GLOBAL_SECTION_SIZE_Y        = 12;
+GLOBAL.GLOBAL_SECTION_SIZE_Y = 12;
+
+GLOBAL.gameServerInstanceGUID = Date.now(); //Determine the game instance
+
 
 
 var gameboard1 = createGameboard1();  // #homestead
